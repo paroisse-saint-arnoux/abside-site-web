@@ -91,6 +91,8 @@ export async function initAgenda() {
     }
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     map.on('load', () => {
+        // La mention des sources s'ouvre d'elle-même au chargement : on la garde repliée derrière le bouton « i ».
+        mapEl.querySelector('.maplibregl-ctrl-attrib')?.classList.remove('maplibregl-compact-show');
         Object.entries(PAINT).forEach(([layer, [prop, value]]) => map.getLayer(layer) && map.setPaintProperty(layer, prop, value));
     });
 
