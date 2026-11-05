@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Event;
 use App\Models\Setting;
 
 class HomeController extends Controller
@@ -10,6 +11,7 @@ class HomeController extends Controller
     {
         return view('home', [
             'home' => Setting::get('home', []),
+            'featured' => Event::featuredForHome(),
         ]);
     }
 }

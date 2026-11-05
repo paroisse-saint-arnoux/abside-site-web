@@ -5,6 +5,13 @@ namespace Tests\Feature;
 use App\Enums\Role;
 use App\Filament\Pages\ManageHome;
 use App\Filament\Pages\ManageSite;
+use App\Filament\Resources\Events\Pages\CreateEvent;
+use App\Filament\Resources\Events\Pages\EditEvent;
+use App\Filament\Resources\Events\Pages\ListEvents;
+use App\Filament\Resources\Keywords\Pages\ManageKeywords;
+use App\Filament\Resources\Places\Pages\ManagePlaces;
+use App\Models\Event;
+use App\Models\Place;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -51,5 +58,28 @@ class AdminFormsTest extends TestCase
 
         $this->assertCount(4, Setting::get('home.doors'));
         $this->assertSame('Théâtre', Setting::get('home.doors')[0]['title']);
+    }
+
+    public function test_event_admin_creates_an_event_with_dates_and_lists_it(): void
+    {
+        $place = Place::create(['name' => 'Église Saint-Étienne', 'city' => 'Nice', 'latitude' => 43.7, 'longitude' => 7.25]);
+
+        Livewire::test(CreateEvent::class)
+            ->fillForm([
+                'title' => 'Au nom de la mère', 'type' => 'theatre', 'place_id' => $place->id,
+                'schedule_mode' => 'dates', 'registration' => 'optional', 'is_published' => true,
+            ])
+            ->set('data.dates', [['starts_at' => '2026-12-12 20:30', 'ends_at' => null, 'label' => null]])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $event = Event::firstWhere('slug', 'au-nom-de-la-mere');
+        $this->assertNotNull($event);
+        $this->assertSame(1, $event->dates()->count());
+
+        Livewire::test(EditEvent::class, ['record' => $event->id])->assertOk()->assertSchemaStateSet(['title' => 'Au nom de la mère']);
+        Livewire::test(ListEvents::class)->assertOk()->assertSee('Au nom de la mère');
+        Livewire::test(ManagePlaces::class)->assertOk()->assertSee('Église Saint-Étienne');
+        Livewire::test(ManageKeywords::class)->assertOk();
     }
 }

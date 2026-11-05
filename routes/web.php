@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\KeywordController;
 use App\Http\Controllers\MagicLinkController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\PageController;
@@ -9,6 +12,11 @@ use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
+
+Route::get('/agenda', AgendaController::class)->name('agenda');
+Route::get('/agenda/{slug}', [EventController::class, 'show'])->name('events.show');
+Route::get('/agenda/{slug}/partage.jpg', [EventController::class, 'shareImage'])->name('events.share-image');
+Route::get('/mot-cle/{slug}', [KeywordController::class, 'show'])->name('keywords.show');
 
 Route::get('/qui-sommes-nous', [PageController::class, 'about'])->name('about');
 Route::get('/soutenir', [PageController::class, 'support'])->name('support');

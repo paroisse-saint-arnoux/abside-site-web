@@ -1,0 +1,90 @@
+// Agenda : carte et filtres à gauche, séances à droite (une ligne par date).
+.agenda-head .wrap { display: flex; flex-wrap: wrap; gap: 16px 32px; justify-content: space-between; align-items: flex-end; }
+.period-toggle {
+  display: flex; gap: 6px; background: $cream; padding: 4px; border-radius: 999px;
+  a { min-height: 44px; display: inline-flex; align-items: center; padding: 0 22px; border-radius: 999px; font-weight: 500; }
+  a.active { background: $navy; color: #fff; }
+}
+
+.agenda { display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start; padding-top: 48px; padding-bottom: 96px; }
+.agenda-aside { flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 26px; }
+[data-agenda-filters] { display: flex; flex-direction: column; gap: 26px; }
+.agenda-results { flex: 999 1 600px; min-width: 0; display: flex; flex-direction: column; gap: 14px; transition: opacity .2s; &.is-loading { opacity: .5; } }
+
+.agenda-map-wrap { display: flex; flex-direction: column; gap: 8px; }
+.agenda-map { aspect-ratio: 1 / 1; border-radius: 24px; overflow: hidden; background: #E8E4D8; }
+.map-hint { margin: 0; font-size: .875rem; color: $ink-soft; }
+.map-pin {
+  position: relative; width: 36px; height: 36px; border-radius: 50%; border: 2px solid #fff; color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba($night, .35);
+  svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .count { position: absolute; right: -8px; top: -8px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: $navy; font-size: .75rem; line-height: 20px; font-weight: 600; text-align: center; }
+}
+
+.filter-group {
+  display: flex; flex-direction: column; gap: 10px;
+  h2 { font-family: $font-body; font-size: 1rem; font-weight: 600; margin: 0; }
+  label { margin: 0; }
+}
+.filter-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.filter-chip {
+  --chip: #{$navy};
+  display: inline-flex; align-items: center; gap: 4px; min-height: 40px; padding: 0 14px; border-radius: 999px;
+  border: 1px solid $navy; font-size: .95rem; font-weight: 500;
+  span { opacity: .8; }
+  &:hover { background: rgba($navy, .06); }
+  &.active { background: var(--chip); border-color: var(--chip); color: #fff; }
+}
+.muted { color: $ink-soft; margin: 0; }
+
+.active-filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 4px; }
+.active-chip {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px 0 16px; border-radius: 999px;
+  background: $navy; color: #fff; font-size: .95rem;
+  svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+  &:hover { color: #fff; background: darken($navy, 6%); }
+}
+.clear-all { padding: 0 8px; text-decoration: underline; text-underline-offset: 4px; font-size: .95rem; }
+.results-count { margin: 0; font-size: .95rem; color: $ink-soft; }
+.empty { margin: 8px 0; }
+.more { display: flex; justify-content: center; margin-top: 12px; }
+
+// Événement en exergue : rectangle aux coins arrondis, image centrée.
+.spotlight {
+  position: relative; display: flex; align-items: flex-end; min-height: 300px; overflow: hidden; border-radius: 24px;
+  background: $night; color: #fff; margin-bottom: 10px;
+  img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+  &::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba($night, 0) 30%, rgba($night, .9) 100%); }
+  .spotlight-text { position: relative; z-index: 1; padding: 28px 32px; display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+  h2 { font-family: $font-display; font-weight: 400; font-size: clamp(1.8rem, 3vw, 2.5rem); line-height: 1.15; margin: 0; }
+  p { margin: 0; }
+  &:hover { color: #fff; }
+}
+
+// Ligne d'une séance : date (carré, couleur du type), textes, visuel à droite — même hauteur pour toutes.
+.event-rows { display: flex; flex-direction: column; gap: 14px; }
+.event-row {
+  display: flex; gap: 20px; align-items: stretch; height: 156px; background: #fff; border-radius: 20px; overflow: hidden;
+  transition: box-shadow .2s $ease;
+  &:hover { box-shadow: 0 6px 24px rgba($navy, .12); }
+  .date-block {
+    flex: 0 0 104px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; background: $navy;
+    @each $type, $color in $type-colors { &.t-#{$type} { background: $color; } }
+    .wd, .mon { font-size: .875rem; line-height: 1.3; font-weight: 500; }
+    .day { font-family: $font-display; font-size: 2.15rem; line-height: 1.1; }
+  }
+  .row-text { flex: 1 1 auto; min-width: 0; padding: 12px 0; overflow: hidden; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+  .row-tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; .chip { font-size: .8125rem; padding: 1px 10px; } }
+  .type-label { font-size: .95rem; font-weight: 600; @each $type, $color in $type-colors { &.t-#{$type} { color: $color; } } }
+  .row-title { font-family: $font-display; font-size: 1.5rem; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .row-meta { font-size: 1rem; line-height: 1.45; }
+  .row-img { flex: 0 0 220px; width: 220px; height: 156px; object-fit: cover; object-position: center; &.is-empty { background: $ochre-soft; } }
+
+  @media (max-width: 700px) {
+    height: auto; min-height: 120px; gap: 14px;
+    .date-block { flex-basis: 76px; .day { font-size: 1.7rem; } }
+    .row-title { font-size: 1.2rem; }
+    .row-meta { font-size: .9rem; }
+    .row-img { display: none; }
+  }
+}

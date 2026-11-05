@@ -46,6 +46,20 @@ npm run build                              # build de production dans public/bui
 - **Un seul contact pour tout le site** (décision du 05/11/2026) : abside.association@gmail.com, 06 14 47 30 42, y compris pour les événements signés « Service Culture du diocèse ». Toutes les inscriptions arrivent sur ce Gmail.
 - Expéditeur des e-mails : une adresse du domaine (`contact@abside-culture.fr`), authentifiée chez Brevo (SPF/DKIM) ; réponse vers le Gmail. Envoyer « depuis » le Gmail via Brevo échouerait aux contrôles DMARC.
 
+### Événements (étape 2, 05/11/2026)
+- Modèle : `Event` (type, lieu, mots clés, chapô, description Markdown, photo, affiche, galerie, **caractéristiques** clé/valeur ≤ 6, partenaires, entrée, inscription, mise en avant, exergue, brouillon/publié + lien d'aperçu), `EventDate` (**une ligne par séance**, sous-titre facultatif), `Place` (nom, adresse, GPS), `Keyword` (page facultative).
+- Dates : séances saisies une à une, ou **horaires récurrents** (période, jours, créneaux, fermetures) → séances générées à chaque enregistrement (`Event::regenerateRecurringDates`).
+- Lieux : coordonnées GPS recherchées automatiquement à partir de l'adresse (`App\Support\Geocoder`, API Adresse de l'État, gratuite).
+- **Agenda** (`/agenda`, `App\Support\Agenda`) : filtres type, mois, mot clé, lieu, zone de carte (`?type=&mois=&mot-cle=&lieu=&zone=&passes=1`), filtrés en mémoire ; chaque filtre compte ses résultats avec les autres filtres actifs. Sans JS : liens et formulaire ; avec JS (`resources/js/modules/agenda.js`) : rechargement partiel (en-tête `X-Agenda: 1` → JSON). Filtres de zone, de lieu ou de mois en `noindex`.
+- **Carte** : MapLibre GL + tuiles **OpenFreeMap** (style positron, gratuites, sans clé), couleurs retouchées à la charte. Déplacer ou zoomer ajoute « Recherche par lieu » ; le retirer recentre sur tous les lieux. Sans WebGL, la carte est masquée.
+- **Accueil** : « À ne pas manquer » = `Event::featuredForHome()` (4 à venir : cochés « Mettre en avant » par date de fin la plus proche, complétés par les prochains) ; bandeau de nuit facultatif (`home.highlight`).
+- **Exergue** de l'agenda : case distincte (`is_spotlight`), affichée si l'événement correspond aux filtres.
+- Mot clé avec page → `/mot-cle/{slug}` (gabarit d'un événement + liste de ses événements) ; sans page → redirection vers l'agenda filtré (`Keyword::url()`).
+- **Image de partage** générée (`App\Support\ShareImage`, GD, gabarit « Nocturne » : photo plein cadre, dégradé, logo blanc, type, titre, date), cache dans `storage/app/public/partage/`, adresse versionnée. Polices TTF (licence OFL) dans `resources/fonts/`.
+- **JSON-LD** : une entrée par séance à venir ; TheaterEvent, EducationEvent (conférences), MusicEvent, ExhibitionEvent, sinon Event.
+- Admin : « Dupliquer » un événement (tout sauf les dates, en brouillon) pour la saison suivante.
+- Saison 2026-2027 reprise des affiches par la migration `seed_events` → `EventsSeeder` (visuels recadrés dans `database/seeders/assets/evenements/`).
+
 ### Inscriptions (décisions du 05/11/2026)
 - **Réglable par événement** : inscription désactivée, facultative ou obligatoire, jauge facultative ; jauge atteinte → formulaire fermé, « Complet ». Pas de liste d'attente.
 - **Rappel automatique la veille** (e-mail Brevo : date, heure, adresse, lien Google Maps), par tâche planifiée (cron cPanel).
@@ -66,7 +80,7 @@ Repris tels quels de Saint Joseph : connexion par **lien magique** uniquement, c
 
 ## Feuille de route
 1. **Fondations** — fait : squelette, charte, en-tête et pied de page, accueil, pages éditables, contact, newsletter.
-2. **Événements** : lieux, mots clés (et pages de mot clé), dates ponctuelles ou récurrentes, caractéristiques (6 max), galerie, affiche, partenaires ; agenda (filtres type, mois, mot clé, lieu, carte MapLibre) ; fiche événement ; mises en avant de l'accueil et exergue de l'agenda ; images de partage générées ; JSON-LD ; sitemap.
+2. **Événements** — fait : lieux, mots clés (et pages de mot clé), dates ponctuelles ou récurrentes, caractéristiques (6 max), galerie, affiche, partenaires ; agenda (filtres type, mois, mot clé, lieu, carte MapLibre) ; fiche événement ; mises en avant de l'accueil et exergue de l'agenda ; images de partage générées ; JSON-LD ; sitemap.
 3. **Inscriptions et contacts** : formulaire, e-mails Brevo, « Ajouter à mon agenda » (.ics, Google), exports Excel.
 4. **Bibliothèque d'images, connecteur Claude (MCP), API, déploiement** (GitHub Action + `deploy.sh`, comme Saint Joseph), reprise des événements des affiches.
 

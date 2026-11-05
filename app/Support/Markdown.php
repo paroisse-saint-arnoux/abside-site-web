@@ -34,6 +34,12 @@ class Markdown
         return (string) $converter->convert($markdown);
     }
 
+    /** Texte court sur plusieurs lignes (valeur d'une caractéristique) : chaque retour à la ligne est conservé. */
+    public static function renderLines(?string $markdown): string
+    {
+        return self::render(preg_replace('/(?<!\n)\n(?!\n)/', "  \n", (string) $markdown));
+    }
+
     public static function youtubeEmbed(string $id): string
     {
         return '<div class="video-embed ratio ratio-16x9"><iframe src="https://www.youtube-nocookie.com/embed/'.e($id).'" title="Vidéo YouTube" loading="lazy" allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe></div>';
