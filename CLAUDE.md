@@ -58,7 +58,8 @@ npm run build                              # build de production dans public/bui
 - **Exergue** de l'agenda : case distincte (`is_spotlight`), affichée si l'événement correspond aux filtres.
 - Mot clé avec page → `/mot-cle/{slug}` (gabarit d'un événement + liste de ses événements) ; sans page → redirection vers l'agenda filtré (`Keyword::url()`).
 - **Image de partage** générée (`App\Support\ShareImage`, GD, gabarit « Nocturne » : photo plein cadre, dégradé, logo blanc, type, titre, date), cache dans `storage/app/public/partage/`, adresse versionnée. Polices TTF (licence OFL) dans `resources/fonts/`.
-- **JSON-LD** : une entrée par séance à venir ; TheaterEvent, EducationEvent (conférences), MusicEvent, ExhibitionEvent, sinon Event.
+- **JSON-LD** : une entrée par séance à venir ; TheaterEvent, EducationEvent (conférences), MusicEvent, ExhibitionEvent, sinon Event (offre « SoldOut » si la séance est complète).
+- **JSON-LD sur toutes les pages** (`App\Support\StructuredData`, injecté par le layout, paramètre `schema`) : un `@graph` avec l'association (`Organization`, `/#organisation` : adresse, téléphone au format international, SIREN, réseaux), le site (`WebSite`), la page (`WebPage`, `CollectionPage` pour l'agenda et les mots clés, `ItemPage` pour un événement, `AboutPage`, `ContactPage`), son fil d'Ariane (`BreadcrumbList`) et, pour l'accueil, l'agenda et les mots clés, la liste des événements (`ItemList`). Ne pas écrire `'@context'` dans un template Blade (c'est une directive) : passer par une classe PHP ou un bloc `@php`.
 - Admin : « Dupliquer » un événement (tout sauf les dates, en brouillon) pour la saison suivante.
 - Saison 2026-2027 reprise des affiches par la migration `seed_events` → `EventsSeeder` (visuels recadrés dans `database/seeders/assets/evenements/`).
 

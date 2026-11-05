@@ -1,4 +1,10 @@
-@extends('layouts.app', ['description' => $home['hero']['text'] ?? null])
+@extends('layouts.app', [
+    'description' => $home['hero']['text'] ?? null,
+    'schema' => [
+        'about' => ['@id' => \App\Support\StructuredData::organizationId()],
+        'nodes' => $featured->isNotEmpty() ? [\App\Support\StructuredData::eventList($featured, route('home').'#a-ne-pas-manquer', 'À ne pas manquer')] : [],
+    ],
+])
 
 @php
     $hero = $home['hero'] ?? [];
@@ -6,20 +12,6 @@
     $highlight = $home['highlight'] ?? [];
     $img = fn (?string $path, string $fallback) => filled($path) ? Storage::url($path) : asset($fallback);
 @endphp
-
-@push('head')
-    <script type="application/ld+json">{!! json_encode([
-        '@context' => 'https://schema.org',
-        '@type' => 'Organization',
-        'name' => $site['legal_name'] ?? config('app.name'),
-        'alternateName' => config('app.name'),
-        'url' => route('home'),
-        'logo' => asset('images/logo-abside.png'),
-        'email' => $site['email'] ?? null,
-        'telephone' => $site['phone'] ?? null,
-        'address' => filled($site['address'] ?? null) ? ['@type' => 'PostalAddress', 'streetAddress' => $site['address'], 'addressCountry' => 'FR'] : null,
-    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
-@endpush
 
 @section('content')
     <section class="home-hero">

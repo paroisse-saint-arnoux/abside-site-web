@@ -29,8 +29,12 @@
             'address' => ['@type' => 'PostalAddress', 'streetAddress' => $place->address, 'postalCode' => $place->postal_code, 'addressLocality' => $place->city, 'addressCountry' => 'FR'],
             'geo' => $place->hasCoordinates() ? ['@type' => 'GeoCoordinates', 'latitude' => $place->latitude, 'longitude' => $place->longitude] : null,
         ]) : null,
-        'organizer' => ['@type' => 'Organization', 'name' => config('app.name'), 'url' => route('home'), 'email' => $site['email'] ?? null],
-        'offers' => $event->is_free ? ['@type' => 'Offer', 'price' => 0, 'priceCurrency' => 'EUR', 'availability' => 'https://schema.org/InStock', 'url' => $event->url()] : null,
+        'organizer' => array_filter(['@type' => 'Organization', '@id' => \App\Support\StructuredData::organizationId(), 'name' => config('app.name'), 'url' => route('home'), 'email' => $site['email'] ?? null]),
+        'inLanguage' => 'fr-FR',
+        'keywords' => $event->keywords->pluck('name')->implode(', ') ?: null,
+        // Séance complète (jauge atteinte) : « SoldOut ».
+        'offers' => $event->is_free ? ['@type' => 'Offer', 'price' => 0, 'priceCurrency' => 'EUR', 'url' => $event->url(),
+            'availability' => ($remaining[$d->id] ?? null) === 0 ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock'] : null,
     ]))->values();
 @endphp
 <script type="application/ld+json">{!! json_encode($items->count() === 1 ? $items->first() : $items->all(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>

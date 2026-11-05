@@ -37,6 +37,8 @@
     <meta name="twitter:description" content="{{ $pageDescription }}">
     <meta name="twitter:image" content="{{ $pageImage }}">
     @stack('head')
+    {{-- Données structurées communes (association, site, page, fil d'Ariane) : App\Support\StructuredData. --}}
+    <script type="application/ld+json">{!! json_encode(\App\Support\StructuredData::graph($schema ?? [], filled($title ?? null) ? $title : $siteName, $pageDescription ?: null, $canonical, $pageImage), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG) !!}</script>
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/scss/app.scss', 'resources/js/app.js'])

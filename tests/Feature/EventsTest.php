@@ -150,6 +150,39 @@ class EventsTest extends TestCase
         $this->assertEqualsWithDelta(7.258923, $place->longitude, 0.00001);
     }
 
+    /** @return array<int, array> blocs JSON-LD de la page */
+    private function jsonLd(string $url): array
+    {
+        preg_match_all('#<script type="application/ld\+json">(.*?)</script>#s', $this->get($url)->assertOk()->getContent(), $m);
+
+        return array_map(fn ($b) => json_decode($b, true, flags: JSON_THROW_ON_ERROR), $m[1]);
+    }
+
+    public function test_every_page_describes_the_organization_page_and_breadcrumb_in_json_ld(): void
+    {
+        \App\Models\Setting::put('site', ['email' => 'abside.association@gmail.com', 'phone' => '06 14 47 30 42', 'address' => '23 avenue Sévigné, 06100 Nice']);
+        $event = $this->event([], ['2026-12-12 20:30'], ['Nuit des églises']);
+        Keyword::where('slug', 'nuit-des-eglises')->update(['has_page' => true]);
+
+        $types = fn (array $blocks) => collect($blocks)->flatMap(fn ($b) => isset($b['@graph']) ? array_column($b['@graph'], '@type') : [$b['@type']])->all();
+
+        foreach (['/' => 'WebPage', '/agenda' => 'CollectionPage', '/mot-cle/nuit-des-eglises' => 'CollectionPage', '/qui-sommes-nous' => 'AboutPage', '/contact' => 'ContactPage', $event->url() => 'ItemPage'] as $url => $type) {
+            $found = $types($this->jsonLd($url));
+            $this->assertContains('Organization', $found, $url);
+            $this->assertContains($type, $found, $url);
+        }
+
+        $graph = collect($this->jsonLd($event->url()))->firstWhere('@graph')['@graph'];
+        $org = collect($graph)->firstWhere('@type', 'Organization');
+        $this->assertSame('+33 6 14 47 30 42', $org['telephone']);
+        $this->assertSame(['@type' => 'PostalAddress', 'streetAddress' => '23 avenue Sévigné', 'postalCode' => '06100', 'addressLocality' => 'Nice', 'addressRegion' => 'Alpes-Maritimes', 'addressCountry' => 'FR'], $org['address']);
+        $crumbs = collect($graph)->firstWhere('@type', 'BreadcrumbList')['itemListElement'];
+        $this->assertSame(['Accueil', 'Agenda', 'Théâtre', 'Au nom de la mère'], array_column($crumbs, 'name'));
+
+        $list = collect(collect($this->jsonLd('/agenda'))->firstWhere('@graph')['@graph'])->firstWhere('@type', 'ItemList');
+        $this->assertSame($event->url(), $list['itemListElement'][0]['url']);
+    }
+
     public function test_robots_only_allows_indexing_on_the_public_domain(): void
     {
         config(['app.url' => 'https://abside.saint-arnoux.fr']);

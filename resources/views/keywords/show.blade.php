@@ -7,6 +7,12 @@
     'description' => $keyword->intro,
     'image' => $keyword->image ? Storage::url($keyword->image) : null,
     'imageAlt' => $keyword->image_alt,
+    'schema' => [
+        'type' => 'CollectionPage',
+        'breadcrumbs' => [['Agenda', route('agenda')], [$keyword->name, $keyword->url()]],
+        'mainEntity' => $dates->isNotEmpty() ? ['@id' => $keyword->url().'#evenements'] : null,
+        'nodes' => $dates->isNotEmpty() ? [\App\Support\StructuredData::eventList($dates->map->event, $keyword->url().'#evenements', $keyword->name)] : [],
+    ],
 ])
 
 @section('content')

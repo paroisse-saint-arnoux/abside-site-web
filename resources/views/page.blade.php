@@ -1,4 +1,8 @@
-@extends('layouts.app', ['title' => $title, 'description' => $intro ?? null])
+@extends('layouts.app', [
+    'title' => $title,
+    'description' => $intro ?? null,
+    'schema' => [...($schema ?? []), 'breadcrumbs' => [[$title, url()->current()]]],
+])
 
 @section('content')
     <section class="page-head">

@@ -3,6 +3,11 @@
 @extends('layouts.app', [
     'title' => 'Contact et presse',
     'description' => "Une question sur un événement de L'Abside, une demande de la presse ? Écrivez-nous.",
+    'schema' => [
+        'type' => 'ContactPage',
+        'mainEntity' => ['@id' => \App\Support\StructuredData::organizationId()],
+        'breadcrumbs' => [['Contact et presse', route('contact')]],
+    ],
 ])
 
 @if (SpamGuard::turnstileEnabled())

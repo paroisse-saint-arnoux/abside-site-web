@@ -3,6 +3,15 @@
     'description' => "Les prochains rendez-vous de L'Abside : théâtre, conférences, concerts, expositions et visites guidées dans les églises des Alpes-Maritimes.",
     'canonical' => route('agenda', array_filter(['type' => $agenda->filters['type'], 'mot-cle' => $agenda->filters['mot-cle']])),
     'noindex' => filled($agenda->filters['zone']) || filled($agenda->filters['lieu']) || filled($agenda->filters['mois']),
+    'schema' => [
+        'type' => 'CollectionPage',
+        'breadcrumbs' => array_values(array_filter([
+            ['Agenda', route('agenda')],
+            ($t = \App\Enums\EventType::tryFrom((string) $agenda->filters['type'])) ? [$t->menuLabel(), route('agenda', ['type' => $t->value])] : null,
+        ])),
+        'mainEntity' => ['@id' => route('agenda').'#seances'],
+        'nodes' => [\App\Support\StructuredData::eventList($rows->map->event, route('agenda').'#seances', $agenda->past ? 'Événements passés' : 'Prochains événements')],
+    ],
 ])
 
 @section('content')

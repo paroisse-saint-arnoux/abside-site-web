@@ -15,6 +15,14 @@
     'ogType' => 'article',
     'canonical' => $event->url(),
     'noindex' => $preview,
+    'schema' => [
+        'type' => 'ItemPage',
+        'breadcrumbs' => [
+            ['Agenda', route('agenda')],
+            [$event->type->menuLabel(), route('agenda', ['type' => $event->type->value])],
+            [$event->title, $event->url()],
+        ],
+    ],
 ])
 
 @push('head')
