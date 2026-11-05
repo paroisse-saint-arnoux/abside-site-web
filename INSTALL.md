@@ -39,7 +39,7 @@ git clone https://github.com/paroisse-saint-arnoux/abside-site-web.git abside-cu
 cd abside-culture.fr
 composer install --no-dev --no-interaction --optimize-autoloader
 cp .env.example .env
-php artisan key:generate        # écrit APP_KEY dans .env
+php artisan key:generate --force    # écrit APP_KEY dans .env (à faire une seule fois, avant le premier deploy.sh)
 nano .env                       # compléter (voir ci-dessous)
 ./deploy.sh                     # composer, migrations, contenu de départ, lien storage, clés OAuth, caches
 ```

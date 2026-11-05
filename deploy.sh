@@ -9,6 +9,9 @@ cd "$(dirname "$0")"
 PHP="${PHP:-php}"
 COMPOSER="${COMPOSER:-composer}"
 
+# Sans clé d'application, toutes les pages répondent 500 : on s'arrête avant de mettre la config en cache.
+grep -qE '^APP_KEY=.+' .env || { echo "APP_KEY manquante dans .env : lancer « php artisan key:generate --force » puis relancer ./deploy.sh."; exit 1; }
+
 echo "[$(date '+%F %T')] Mise à jour depuis main"
 
 # Page de maintenance pendant la mise à jour, levée même en cas d'erreur.
