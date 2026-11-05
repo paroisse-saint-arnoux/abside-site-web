@@ -66,24 +66,24 @@
 // Ligne d'une séance : date (carré, couleur du type), textes, visuel à droite — même hauteur pour toutes.
 .event-rows { display: flex; flex-direction: column; gap: 14px; }
 .event-row {
-  display: flex; gap: 20px; align-items: stretch; height: 125px; background: #fff; border-radius: 20px; overflow: hidden;
+  display: flex; gap: 20px; align-items: stretch; height: 112px; background: #fff; border-radius: 20px; overflow: hidden;
   transition: box-shadow .2s $ease;
   &:hover { box-shadow: 0 6px 24px rgba($navy, .12); }
   .date-block {
-    flex: 0 0 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; background: $navy;
+    flex: 0 0 96px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; background: $navy;
     @each $type, $color in $type-colors { &.t-#{$type} { background: $color; } }
     .wd, .mon { font-size: .875rem; line-height: 1.3; font-weight: 500; }
-    .day { font-family: $font-display; font-size: 2rem; line-height: 1.05; }
+    .day { font-family: $font-display; font-size: 1.85rem; line-height: 1.05; }
   }
-  .row-text { flex: 1 1 auto; min-width: 0; padding: 8px 0; overflow: hidden; display: flex; flex-direction: column; justify-content: center; gap: 3px; }
+  .row-text { flex: 1 1 auto; min-width: 0; padding: 6px 0; overflow: hidden; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
   .row-tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; .chip { font-size: .8125rem; padding: 1px 10px; } }
   .type-label { font-size: .95rem; font-weight: 600; @each $type, $color in $type-colors { &.t-#{$type} { color: $color; } } }
-  .row-title { font-family: $font-display; font-size: 1.35rem; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .row-meta { font-size: .95rem; line-height: 1.4; }
-  .row-img { flex: 0 0 220px; width: 220px; height: 125px; object-fit: cover; object-position: center; &.is-empty { background: $ochre-soft; } }
+  .row-title { font-family: $font-display; font-size: 1.25rem; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .row-meta { font-size: .9rem; line-height: 1.35; }
+  .row-img { flex: 0 0 220px; width: 220px; height: 112px; object-fit: cover; object-position: center; &.is-empty { background: $ochre-soft; } }
 
   @media (max-width: 700px) {
-    height: auto; min-height: 96px; gap: 14px;
+    height: auto; min-height: 86px; gap: 14px;
     .date-block { flex-basis: 76px; .day { font-size: 1.7rem; } }
     .row-title { font-size: 1.2rem; }
     .row-meta { font-size: .9rem; }
