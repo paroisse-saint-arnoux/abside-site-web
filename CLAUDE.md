@@ -92,11 +92,11 @@ Repris tels quels de Saint Joseph : connexion par **lien magique** uniquement, c
 1. **Fondations** — fait : squelette, charte, en-tête et pied de page, accueil, pages éditables, contact, newsletter.
 2. **Événements** — fait : lieux, mots clés (et pages de mot clé), dates ponctuelles ou récurrentes, caractéristiques (6 max), galerie, affiche, partenaires ; agenda (filtres type, mois, mot clé, lieu, carte MapLibre) ; fiche événement ; mises en avant de l'accueil et exergue de l'agenda ; images de partage générées ; JSON-LD ; sitemap.
 3. **Inscriptions et contacts** — fait : formulaire, jauge par séance, e-mails (confirmation, alerte, rappel la veille, annulation), « Ajouter à mon agenda » (.ics, Google), contacts, exports Excel, purge RGPD.
-4. **Bibliothèque d'images, connecteur Claude (MCP), API, déploiement** (GitHub Action + `deploy.sh`, comme Saint Joseph), reprise des événements des affiches.
+4. **Bibliothèque d'images, connecteur Claude (MCP), API, déploiement** (`deploy.sh` sur `main`), reprise des événements des affiches.
 
 ## Déploiement (O2Switch)
 Procédure complète (comptes, `.env`, crons, mises à jour) : [INSTALL.md](INSTALL.md).
-Même principe que Saint Joseph : GitHub Action sur `main` (tests, build, branche `production`), `./deploy.sh` côté serveur (git, composer, migrations, caches). Toute évolution de schéma ou de contenu initial passe par une migration.
+**Différent de Saint Joseph** (décision du 05/11/2026) : pas de branche `production`, le serveur suit **`main`**. `public/build` est **versionné** (pas de npm sur le serveur) : lancer `npm run build` et commiter `public/build` après toute modification SCSS/JS (l'Action « Tests » échoue sinon). Mise en ligne à la main en SSH : `./deploy.sh` (git pull, composer, migrations, caches). Toute évolution de schéma ou de contenu initial passe par une migration.
 
 ## Conventions de code
 - Code et commentaires en français pour le métier ; classes et méthodes en anglais (Laravel).

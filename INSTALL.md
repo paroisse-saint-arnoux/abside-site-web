@@ -1,14 +1,13 @@
 # Installation et mise en production
 
 Site de L'Abside : **https://abside-culture.fr**, sur l'hébergement mutualisé **O2Switch** (cPanel, PHP 8.5, MySQL, SSH).
-Même fonctionnement que le site Saint Joseph : GitHub prépare une branche `production`, le serveur la récupère avec `./deploy.sh`.
-GitHub n'a aucun accès au serveur, et aucun secret n'est stocké chez GitHub.
+Le serveur suit directement la branche **`main`**. Le front compilé (`public/build`) est versionné, car il n'y a pas de npm sur le serveur.
+La mise en ligne se fait à la main, en SSH, avec `./deploy.sh` (git pull, composer, artisan). GitHub n'a aucun accès au serveur.
 
 ```
-push sur main ──► GitHub Action : tests, compilation SCSS/JS ──► branche production
-                                                                     │
-serveur O2Switch : ./deploy.sh (cron toutes les 5 min) ◄─────────────┘
-                   git, composer, migrations, caches
+poste de dev : npm run build, commit (public/build compris), push sur main
+                 └─► GitHub Action « Tests » : tests + contrôle que public/build est à jour
+serveur O2Switch : ./deploy.sh  →  git pull main, composer install, migrations, caches
 ```
 
 ## 1. Préparer les comptes
@@ -36,16 +35,16 @@ En SSH :
 
 ```bash
 cd ~
-git clone -b production https://github.com/paroisse-saint-arnoux/abside-site-web.git abside-culture.fr
+git clone https://github.com/paroisse-saint-arnoux/abside-site-web.git abside-culture.fr
 cd abside-culture.fr
 composer install --no-dev --no-interaction --optimize-autoloader
 cp .env.example .env
 php artisan key:generate        # écrit APP_KEY dans .env
 nano .env                       # compléter (voir ci-dessous)
-./deploy.sh --force             # composer, migrations, contenu de départ, lien storage, clés OAuth, caches
+./deploy.sh                     # composer, migrations, contenu de départ, lien storage, clés OAuth, caches
 ```
 
-Le dépôt est public : le clonage en HTTPS ne demande aucune clé. La branche `production` doit exister, donc il faut avoir poussé au moins une fois sur `main` (voir l'étape 4).
+Le dépôt est public : le clonage en HTTPS ne demande aucune clé.
 
 ### Variables à compléter dans `.env`
 
@@ -61,7 +60,7 @@ Le dépôt est public : le clonage en HTTPS ne demande aucune clé. La branche `
 
 Laisser `APP_ENV=production` et `APP_DEBUG=false`. Il n'y a pas de file d'attente (`QUEUE_CONNECTION=sync`) : les e-mails partent immédiatement.
 
-Si la commande `php` du terminal n'est pas en version 8.5, lancer le script avec le bon binaire, par exemple `PHP=/opt/alt/php85/usr/bin/php ./deploy.sh --force`. Il faudra alors utiliser le même chemin dans les crons.
+Si la commande `php` du terminal n'est pas en version 8.5, lancer le script avec le bon binaire, par exemple `PHP=/opt/alt/php85/usr/bin/php ./deploy.sh`. Il faudra alors utiliser le même chemin dans le cron.
 
 ### Première connexion à l'admin
 Aller sur https://abside-culture.fr/admin et saisir l'adresse `ADMIN_EMAIL` : un lien de connexion arrive par e-mail. Il n'y a pas de mot de passe.
@@ -69,14 +68,13 @@ Les autres personnes sont ajoutées ensuite dans **Admin → Utilisateurs**.
 
 ## 3. Tâches planifiées (cron cPanel)
 
-Dans cPanel, menu **Tâches Cron**, ajouter deux lignes. Remplacer `abside-culture.fr` par le nom du dossier s'il est différent.
+Dans cPanel, menu **Tâches Cron**, ajouter une ligne qui s'exécute **chaque minute** (`* * * * *`). Remplacer `abside-culture.fr` par le nom du dossier s'il est différent :
 
-| Fréquence | Commande | Rôle |
-|---|---|---|
-| Chaque minute (`* * * * *`) | `cd ~/abside-culture.fr && php artisan schedule:run >> /dev/null 2>&1` | **Indispensable** : tâches du site (voir ci-dessous) |
-| Toutes les 5 minutes (`*/5 * * * *`) | `cd ~/abside-culture.fr && ./deploy.sh >> storage/logs/deploy.log 2>&1` | Mise en ligne automatique des nouvelles versions (le script ne fait rien s'il n'y a pas de nouveauté) |
+```
+cd ~/abside-culture.fr && php artisan schedule:run >> /dev/null 2>&1
+```
 
-Le premier cron déclenche les tâches définies dans `routes/console.php` :
+Ce cron déclenche les tâches définies dans `routes/console.php` :
 
 | Heure | Commande | Rôle |
 |---|---|---|
@@ -94,21 +92,31 @@ php artisan inscriptions:rappels    # envoie tout de suite les rappels de demain
 
 ## 4. Mettre à jour le site
 
-1. Développer sur une branche, fusionner dans **`main`** et pousser.
-2. La GitHub Action **Publication** (`.github/workflows/deploy.yml`) lance les tests, compile le front et met à jour la branche `production`. Si les tests échouent, rien n'est publié.
-3. Le serveur récupère la nouvelle version au prochain passage du cron. Sans attendre, on peut lancer `./deploy.sh` en SSH.
+1. **En local** : après une modification SCSS ou JS, lancer `npm run build` et commiter `public/build` avec le reste.
+   La GitHub Action **Tests** (`.github/workflows/tests.yml`) échoue si `public/build` n'est pas à jour, ou si un test échoue.
+2. Fusionner dans **`main`** et pousser, en attendant que l'Action soit au vert.
+3. **Sur le serveur**, en SSH :
 
-`deploy.sh` affiche une page de maintenance de quelques secondes, puis enchaîne : `git checkout` de `production`, `composer install --no-dev`, `migrate --force`, `storage:link`, clés OAuth (une seule fois), puis `optimize` et `filament:optimize`.
-Ses options :
-- `./deploy.sh --force` relance tout, même sans nouveau commit (après une modification du `.env`, par exemple) ;
-- en cas de blocage, `php artisan up` lève la page de maintenance.
+   ```bash
+   cd ~/abside-culture.fr && ./deploy.sh
+   ```
+
+`deploy.sh` affiche une page de maintenance de quelques secondes, puis enchaîne :
+- `git pull --ff-only origin main` ;
+- `composer install --no-dev` ;
+- `migrate --force` ;
+- `storage:link` et clés OAuth (une seule fois) ;
+- `optimize` et `filament:optimize`.
+
+On peut le relancer sans risque, par exemple après une modification du `.env`. En cas de blocage, `php artisan up` lève la page de maintenance.
+Le `git pull` refuse de fusionner si des fichiers suivis par git ont été modifiés sur le serveur : il ne faut rien modifier à la main sur le serveur.
 
 Les fichiers ignorés par git ne sont jamais touchés par une mise à jour : `.env`, `vendor/`, et `storage/` (images envoyées depuis l'admin, images de partage, journaux).
 
 ## 5. Sauvegardes et suivi
 
 - **Sauvegardes** : JetBackup d'O2Switch (fichiers et bases, restauration depuis cPanel). Les données à protéger sont la base MySQL et `storage/app/public` (images).
-- **Journaux** : `storage/logs/laravel-AAAA-MM-JJ.log` (erreurs, échecs d'envoi d'e-mail ou d'appel à Brevo) et `storage/logs/deploy.log`.
+- **Journaux** : `storage/logs/laravel-AAAA-MM-JJ.log` (erreurs, échecs d'envoi d'e-mail ou d'appel à Brevo) 
 - **E-mails non reçus** : vérifier les journaux d'envoi de Brevo (Transactionnel → Journaux), puis `storage/logs`.
 
 ## Développement local

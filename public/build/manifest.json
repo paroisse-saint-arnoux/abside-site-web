@@ -1,0 +1,77 @@
+{
+  "node_modules/@fontsource-variable/figtree/files/figtree-latin-ext-wght-normal.woff2": {
+    "file": "assets/figtree-latin-ext-wght-normal-DCwSJGxG.woff2",
+    "src": "node_modules/@fontsource-variable/figtree/files/figtree-latin-ext-wght-normal.woff2"
+  },
+  "node_modules/@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2": {
+    "file": "assets/figtree-latin-wght-normal-D_ZTVpCC.woff2",
+    "src": "node_modules/@fontsource-variable/figtree/files/figtree-latin-wght-normal.woff2"
+  },
+  "node_modules/@fontsource/marcellus/files/marcellus-latin-400-normal.woff": {
+    "file": "assets/marcellus-latin-400-normal-AvMY561b.woff",
+    "src": "node_modules/@fontsource/marcellus/files/marcellus-latin-400-normal.woff"
+  },
+  "node_modules/@fontsource/marcellus/files/marcellus-latin-400-normal.woff2": {
+    "file": "assets/marcellus-latin-400-normal-86dSXJnk.woff2",
+    "src": "node_modules/@fontsource/marcellus/files/marcellus-latin-400-normal.woff2"
+  },
+  "node_modules/@fontsource/marcellus/files/marcellus-latin-ext-400-normal.woff": {
+    "file": "assets/marcellus-latin-ext-400-normal-D06jIo1e.woff",
+    "src": "node_modules/@fontsource/marcellus/files/marcellus-latin-ext-400-normal.woff"
+  },
+  "node_modules/@fontsource/marcellus/files/marcellus-latin-ext-400-normal.woff2": {
+    "file": "assets/marcellus-latin-ext-400-normal-DkjSXVBo.woff2",
+    "src": "node_modules/@fontsource/marcellus/files/marcellus-latin-ext-400-normal.woff2"
+  },
+  "node_modules/maplibre-gl/dist/maplibre-gl.css": {
+    "file": "assets/maplibre-gl-B2k4QVOw.css",
+    "src": "node_modules/maplibre-gl/dist/maplibre-gl.css"
+  },
+  "node_modules/maplibre-gl/dist/maplibre-gl.js": {
+    "file": "assets/maplibre-gl-vds9q8C7.js",
+    "name": "maplibre-gl",
+    "src": "node_modules/maplibre-gl/dist/maplibre-gl.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-Bh75uCIC.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "dynamicImports": [
+      "node_modules/maplibre-gl/dist/maplibre-gl.js"
+    ],
+    "css": [
+      "assets/app-BeBky5ZG.css"
+    ],
+    "assets": [
+      "assets/marcellus-latin-ext-400-normal-DkjSXVBo.woff2",
+      "assets/marcellus-latin-ext-400-normal-D06jIo1e.woff",
+      "assets/marcellus-latin-400-normal-86dSXJnk.woff2",
+      "assets/marcellus-latin-400-normal-AvMY561b.woff",
+      "assets/figtree-latin-ext-wght-normal-DCwSJGxG.woff2",
+      "assets/figtree-latin-wght-normal-D_ZTVpCC.woff2"
+    ]
+  },
+  "resources/scss/app.scss": {
+    "file": "assets/app-DviNEAKy.css",
+    "name": "app",
+    "names": [
+      "app.css"
+    ],
+    "src": "resources/scss/app.scss",
+    "isEntry": true
+  },
+  "resources/scss/preview.scss": {
+    "file": "assets/preview-jB44MjvC.css",
+    "name": "preview",
+    "names": [
+      "preview.css"
+    ],
+    "src": "resources/scss/preview.scss",
+    "isEntry": true
+  }
+}
