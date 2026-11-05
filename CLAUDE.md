@@ -95,6 +95,7 @@ Repris tels quels de Saint Joseph : connexion par **lien magique** uniquement, c
 4. **Bibliothèque d'images, connecteur Claude (MCP), API, déploiement** (GitHub Action + `deploy.sh`, comme Saint Joseph), reprise des événements des affiches.
 
 ## Déploiement (O2Switch)
+Procédure complète (comptes, `.env`, crons, mises à jour) : [INSTALL.md](INSTALL.md).
 Même principe que Saint Joseph : GitHub Action sur `main` (tests, build, branche `production`), `./deploy.sh` côté serveur (git, composer, migrations, caches). Toute évolution de schéma ou de contenu initial passe par une migration.
 
 ## Conventions de code
