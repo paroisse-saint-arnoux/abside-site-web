@@ -17,7 +17,15 @@
     h2 { font-family: $font-display; font-weight: 400; font-size: 2rem; line-height: 1.2; }
     p { margin: 0; font-size: 1rem; line-height: 1.5; }
   }
-  @media (max-width: 700px) { padding: 56px 0; .door { min-height: 300px; padding-top: 110px; } }
+  // Téléphone : deux lignes de deux blocs.
+  @media (max-width: 700px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 40px 0;
+    .door {
+      min-height: 230px; padding: 70px 14px 18px; border-radius: 90px 90px 0 0; gap: 6px;
+      h2 { font-size: 1.3rem; }
+      p { font-size: .85rem; line-height: 1.4; }
+    }
+  }
 }
 
 .home-about {
