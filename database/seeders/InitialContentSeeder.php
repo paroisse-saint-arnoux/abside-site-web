@@ -156,6 +156,10 @@ Votre nom, votre adresse e-mail et votre message nous sont transmis par e-mail a
 
 Si vous vous y inscrivez, votre prénom, votre nom et votre adresse e-mail sont enregistrés chez notre prestataire d'e-mailing **Brevo** (Sendinblue SAS, France) pour vous envoyer nos informations. Chaque lettre contient un lien de désinscription.
 
+## Mesure d'audience
+
+Nous mesurons la fréquentation du site avec **Matomo**, installé sur un serveur de la paroisse Saint-Arnoux, sans cookie et avec des adresses IP anonymisées. Ces statistiques ne servent qu'à améliorer le site et ne sont partagées avec personne.
+
 ## Vos droits
 
 Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, d'opposition et de suppression de vos données. Écrivez-nous à [abside.association@gmail.com](mailto:abside.association@gmail.com). Vous pouvez aussi adresser une réclamation à la [CNIL](https://www.cnil.fr).

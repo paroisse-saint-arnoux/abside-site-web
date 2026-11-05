@@ -86,6 +86,9 @@ npm run build                              # build de production dans public/bui
 ### Indexation
 - `robots.txt` est une route : seule `abside-culture.fr` (`config('app.public_host')`) est indexable ; sur une autre adresse (recette `abside.saint-arnoux.fr`), robots.txt interdit tout et les pages sont en `noindex`.
 
+### Statistiques
+- **Matomo** auto-hébergé (`https://matomo.saint-arnoux.fr/`, site n° 4), repris de Saint Joseph : suivi sans cookie (`partials/matomo`, en production seulement), changements de filtre de l'agenda comptés comme pages vues ; tableau de bord de l'admin (`App\Services\Matomo`, widgets visites, graphique, pages les plus vues) avec `MATOMO_TOKEN`. Mentionné dans la politique de confidentialité.
+
 ### Formulaires
 - Newsletter : **Brevo** API (`App\Services\Brevo`, `BREVO_API_KEY`, `BREVO_LIST_ID`), sans double opt-in.
 - Contact : e-mail à `CONTACT_EMAIL`, reply-to = visiteur, non stocké.

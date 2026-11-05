@@ -38,7 +38,11 @@ export async function initAgenda() {
             filters.innerHTML = data.filters;
             pins = data.pins;
             drawPins();
-            if (push) history.pushState({}, '', url);
+            if (push) {
+                history.pushState({}, '', url);
+                // Statistiques (Matomo) : un changement de filtre compte comme une page vue.
+                window._paq?.push(['setCustomUrl', location.href], ['setDocumentTitle', document.title], ['trackPageView']);
+            }
             syncPeriodToggle(url);
         } catch {
             window.location.href = url; // repli : chargement classique

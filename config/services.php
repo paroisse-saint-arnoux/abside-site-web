@@ -35,6 +35,13 @@ return [
         ],
     ],
 
+    'matomo' => [
+        'url' => env('MATOMO_URL'),
+        'site_id' => env('MATOMO_SITE_ID'),
+        // Clé d'API Matomo (droit « vue » sur le site), pour les statistiques du tableau de bord de l'admin.
+        'token' => env('MATOMO_TOKEN'),
+    ],
+
     'brevo' => [
         'key' => env('BREVO_API_KEY'),
         // Liste Brevo des abonnés à la lettre d'information de l'Abside.

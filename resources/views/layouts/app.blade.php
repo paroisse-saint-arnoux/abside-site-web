@@ -42,6 +42,7 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/scss/app.scss', 'resources/js/app.js'])
+    @include('partials.matomo')
 </head>
 <body class="{{ $bodyClass ?? '' }}">
     <a href="#main" class="visually-hidden-focusable">Aller au contenu</a>

@@ -56,6 +56,8 @@ Le dépôt est public : le clonage en HTTPS ne demande aucune clé.
 | `BREVO_API_KEY`, `BREVO_LIST_ID` | clé **API** Brevo et numéro de la liste newsletter |
 | `CONTACT_EMAIL` | `abside.association@gmail.com` : reçoit les messages de contact et les alertes d'inscription |
 | `ADMIN_EMAIL` | adresse du premier administrateur, créé par les migrations |
+| `MATOMO_URL`, `MATOMO_SITE_ID` | `https://matomo.saint-arnoux.fr/` et `4` : statistiques de visite (suivi actif seulement avec `APP_ENV=production`) |
+| `MATOMO_TOKEN` | clé d'API Matomo avec le droit « vue » sur le site : chiffres de fréquentation dans le tableau de bord de l'admin |
 | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | facultatif |
 
 Laisser `APP_ENV=production` et `APP_DEBUG=false`. Il n'y a pas de file d'attente (`QUEUE_CONNECTION=sync`) : les e-mails partent immédiatement.
