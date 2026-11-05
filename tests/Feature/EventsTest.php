@@ -150,6 +150,17 @@ class EventsTest extends TestCase
         $this->assertEqualsWithDelta(7.258923, $place->longitude, 0.00001);
     }
 
+    public function test_robots_only_allows_indexing_on_the_public_domain(): void
+    {
+        config(['app.url' => 'https://abside.saint-arnoux.fr']);
+        $this->get('/robots.txt')->assertOk()->assertSee('Disallow: /')->assertDontSee('Sitemap');
+        $this->get('/')->assertSee('<meta name="robots" content="noindex, nofollow">', false);
+
+        config(['app.url' => 'https://abside-culture.fr']);
+        $this->get('/robots.txt')->assertSee('Sitemap: https://abside-culture.fr/sitemap.xml')->assertDontSee("Disallow: /\n", false);
+        $this->get('/')->assertDontSee('noindex', false)->assertSee('rel="canonical"', false);
+    }
+
     public function test_sitemap_lists_published_events_and_keyword_pages(): void
     {
         $event = $this->event();

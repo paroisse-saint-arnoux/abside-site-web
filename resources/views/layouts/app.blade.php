@@ -13,7 +13,7 @@
     <title>{{ $pageTitle }}</title>
     <meta name="description" content="{{ $pageDescription }}">
     <meta name="theme-color" content="#E9BE4A">
-    @if (! empty($noindex))
+    @if (! empty($noindex) || parse_url(config('app.url'), PHP_URL_HOST) !== config('app.public_host'))
         <meta name="robots" content="noindex, nofollow">
     @else
         <link rel="canonical" href="{{ $canonical }}">

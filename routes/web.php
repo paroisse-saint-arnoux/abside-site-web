@@ -34,6 +34,14 @@ Route::get('/mentions-legales', [PageController::class, 'legal'])->name('legal')
 Route::get('/confidentialite', [PageController::class, 'privacy'])->name('privacy');
 
 Route::get('/sitemap.xml', SitemapController::class)->name('sitemap');
+Route::get('/robots.txt', function () {
+    $public = parse_url(config('app.url'), PHP_URL_HOST) === config('app.public_host');
+    $body = $public
+        ? "User-agent: *\nDisallow: /admin\nDisallow: /connexion\nDisallow: /inscription\nDisallow: /api\n\nSitemap: ".rtrim(config('app.url'), '/')."/sitemap.xml\n"
+        : "User-agent: *\nDisallow: /\n";
+
+    return response($body)->header('Content-Type', 'text/plain; charset=utf-8');
+})->name('robots');
 
 Route::middleware('signed')->group(function () {
     Route::get('/connexion/{token}', [MagicLinkController::class, 'show'])->name('magic-link.show');

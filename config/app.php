@@ -54,6 +54,10 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    // Seule adresse indexée par les moteurs de recherche : ailleurs (adresse temporaire, recette), robots.txt et
+    // les pages interdisent l'indexation.
+    'public_host' => 'abside-culture.fr',
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
