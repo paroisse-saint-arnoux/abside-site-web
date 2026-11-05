@@ -15,10 +15,11 @@
   border-top: 1px solid rgba($navy, .3);
   font-family: $font-display; font-size: 1.375rem; line-height: 1.3;
   a { padding: 12px 0; &:hover, &.active { text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 1px; } }
-  // Sur téléphone : une rangée qui défile horizontalement.
+  .nav-break { display: none; }
+  // Sur téléphone : deux lignes de trois, réparties sur toute la largeur.
   @media (max-width: 700px) {
-    flex-wrap: nowrap; justify-content: flex-start; gap: 22px; overflow-x: auto; white-space: nowrap;
-    border-top: 0; font-size: 1.2rem; scrollbar-width: none; &::-webkit-scrollbar { display: none; }
-    a { padding: 10px 0; }
+    gap: 0 12px; justify-content: space-between; border-top: 0; font-size: 1.15rem; white-space: nowrap;
+    .nav-break { display: block; flex-basis: 100%; height: 0; }
+    a { padding: 7px 0; }
   }
 }

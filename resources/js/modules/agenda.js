@@ -82,7 +82,8 @@ export async function initAgenda() {
 
     addEventListener('popstate', () => load(location.href, { push: false }));
 
-    if (!mapEl) return;
+    // Carte masquée (téléphone) : on ne charge pas MapLibre.
+    if (!mapEl || !mapEl.offsetParent) return;
     const { default: maplibregl } = await import('maplibre-gl');
     await import('maplibre-gl/dist/maplibre-gl.css');
 

@@ -9,6 +9,11 @@
 .agenda { display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start; padding-top: 48px; padding-bottom: 96px; }
 .agenda-aside { flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 26px; }
 [data-agenda-filters] { display: flex; flex-direction: column; gap: 26px; }
+// Sur téléphone : ni carte, ni filtres, ni « À venir / Passés » ; seulement les séances (les menus filtrent par type).
+@media (max-width: 700px) {
+  .period-toggle, .agenda-aside { display: none; }
+  .agenda { padding-top: 24px; }
+}
 .agenda-results { flex: 999 1 600px; min-width: 0; display: flex; flex-direction: column; gap: 14px; transition: opacity .2s; &.is-loading { opacity: .5; } }
 
 .agenda-map-wrap { display: flex; flex-direction: column; gap: 8px; }

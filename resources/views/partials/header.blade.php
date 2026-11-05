@@ -12,6 +12,7 @@
         </div>
         <nav class="nav-types" aria-label="Types d'événement">
             @foreach (EventType::cases() as $type)
+                @if ($loop->index === 3)<span class="nav-break" aria-hidden="true"></span>@endif
                 <a href="{{ route('agenda', ['type' => $type->value]) }}" @class(['active' => request('type') === $type->value])>{{ $type->menuLabel() }}</a>
             @endforeach
         </nav>

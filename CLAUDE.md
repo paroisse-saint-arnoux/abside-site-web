@@ -38,7 +38,8 @@ npm run build                              # build de production dans public/bui
 - Logo : `public/images/logo-abside.svg` (bleu) et `logo-abside-blanc.svg`. Le fichier source blanc (`L'abside_Blanc.svg`) n'a pas le même cadrage que la version bleue (dessin décalé d'environ 20 unités vers le haut) : son `viewBox` est recadré sur son propre dessin (`100.5 120 412 290`).
 
 ### Navigation
-- En-tête : logo, « Tout l'agenda », bouton « Soutenir », puis les **six types** en grand (Théâtre, Conférences, Concerts, Expo, Visites guidées, Événements = tout le reste) → agenda filtré (`/agenda?type=…`).
+- En-tête : logo, « Tout l'agenda », bouton « Soutenir », puis les **six types** en grand (Théâtre, Conférences, Concerts, Expos, Visites guidées, Événements = tout le reste) → agenda filtré (`/agenda?type=…`). Sur téléphone : deux lignes de trois, réparties sur toute la largeur.
+- Agenda sur téléphone : ni carte, ni filtres, ni « À venir / Passés » (seulement les séances).
 - Pied de page : Qui sommes-nous, Contact et presse, Soutenir l'association, réseaux, coordonnées, mentions légales, confidentialité.
 - Bande « Recevoir les informations de L'Abside » (newsletter) sur chaque page.
 

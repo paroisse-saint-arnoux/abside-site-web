@@ -22,7 +22,7 @@ enum EventType: string
             self::Theatre => 'Théâtre',
             self::Conference => 'Conférence',
             self::Concert => 'Concert',
-            self::Expo => 'Expo',
+            self::Expo => 'Expos',
             self::Visite => 'Visite guidée',
             self::Evenement => 'Événement',
         };
@@ -35,7 +35,7 @@ enum EventType: string
             self::Theatre => 'Théâtre',
             self::Conference => 'Conférences',
             self::Concert => 'Concerts',
-            self::Expo => 'Expo',
+            self::Expo => 'Expos',
             self::Visite => 'Visites guidées',
             self::Evenement => 'Événements',
         };
