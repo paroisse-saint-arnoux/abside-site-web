@@ -8,6 +8,7 @@ use App\Http\Controllers\KeywordController;
 use App\Http\Controllers\MagicLinkController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +17,10 @@ Route::get('/', HomeController::class)->name('home');
 Route::get('/agenda', AgendaController::class)->name('agenda');
 Route::get('/agenda/{slug}', [EventController::class, 'show'])->name('events.show');
 Route::get('/agenda/{slug}/partage.jpg', [EventController::class, 'shareImage'])->name('events.share-image');
+Route::post('/agenda/{slug}/inscription', [RegistrationController::class, 'store'])->middleware('throttle:10,10')->name('registrations.store');
+Route::get('/inscription/{token}/agenda.ics', [RegistrationController::class, 'ics'])->name('registrations.ics');
+Route::get('/inscription/{token}/annuler', [RegistrationController::class, 'cancel'])->name('registrations.cancel');
+Route::post('/inscription/{token}/annuler', [RegistrationController::class, 'destroy'])->middleware('throttle:10,10')->name('registrations.destroy');
 Route::get('/mot-cle/{slug}', [KeywordController::class, 'show'])->name('keywords.show');
 
 Route::get('/qui-sommes-nous', [PageController::class, 'about'])->name('about');

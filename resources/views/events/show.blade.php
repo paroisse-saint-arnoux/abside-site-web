@@ -1,11 +1,11 @@
 @php
-    use App\Enums\Registration;
     use App\Support\Markdown;
     $place = $event->place;
     $first = $upcoming->first() ?? $dates->last();
     $gallery = collect($event->gallery ?? [])->filter(fn ($g) => filled($g['path'] ?? null))->values();
     $partners = collect($event->partners ?? [])->filter(fn ($p) => filled($p['path'] ?? null))->values();
-    $canRegister = $event->registration !== Registration::None && $upcoming->isNotEmpty();
+    $canRegister = $event->acceptsRegistrations() && $bookable->isNotEmpty();
+    $isFull = $canRegister && collect($remaining)->every(fn ($n) => $n === 0);
 @endphp
 @extends('layouts.app', [
     'title' => $event->title,
@@ -67,7 +67,11 @@
                 <div class="band-item"><span class="band-label">Entrée</span>{{ $event->priceLabel() }}</div>
             @endif
             @if ($canRegister)
-                <a href="#inscription" class="btn-pill band-cta">S'inscrire à l'événement</a>
+                @if ($isFull)
+                    <span class="band-full">Complet</span>
+                @else
+                    <a href="#inscription" class="btn-pill band-cta">S'inscrire à l'événement</a>
+                @endif
             @endif
         </div>
     </section>

@@ -28,6 +28,17 @@ class EventDate extends Model
         return $this->belongsTo(Event::class);
     }
 
+    public function registrations(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Registration::class);
+    }
+
+    /** Fin de la séance pour les agendas : heure de fin, sinon 2 heures après le début. */
+    public function endsAtOrDefault(): Carbon
+    {
+        return $this->ends_at ?? $this->starts_at->copy()->addHours(2);
+    }
+
     /** Séances à venir (ou en cours) : on garde une séance jusqu'à sa fin. */
     public function scopeUpcoming(Builder $query): void
     {

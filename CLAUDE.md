@@ -64,6 +64,16 @@ npm run build                              # build de production dans public/bui
 - **Réglable par événement** : inscription désactivée, facultative ou obligatoire, jauge facultative ; jauge atteinte → formulaire fermé, « Complet ». Pas de liste d'attente.
 - **Rappel automatique la veille** (e-mail Brevo : date, heure, adresse, lien Google Maps), par tâche planifiée (cron cPanel).
 - **RGPD** : inscriptions et contacts conservés **3 ans après la dernière participation**, puis supprimés automatiquement.
+- Mise en œuvre (étape 3) :
+  - `Contact` (une fiche par e-mail, en minuscules ; `created_at` = date d'ajout ; `newsletter_at`) et `Registration` (contact × séance, nombre de places ≤ 10, `starts_at` recopié de la séance, jeton pour le .ics et l'annulation). Une seule inscription par contact et par séance : se réinscrire met à jour le nombre de places.
+  - `App\Support\Booking::book()` : création ou mise à jour du contact et de l'inscription, **jauge par séance** sous verrou (formulaire du site et ajout manuel dans l'admin, qui peut forcer la jauge).
+  - Formulaire (`events/partials/registration`) : date (si plusieurs séances, places restantes affichées sous 10), prénom, nom, e-mail, téléphone facultatif, places, case newsletter non cochée (→ Brevo). Après envoi : confirmation, « Ajouter à mon agenda » (.ics) et Google Agenda. Toutes les dates complètes → « Complet » dans le bandeau.
+  - E-mails (`app/Mail/Registration*`, SMTP Brevo) : confirmation au participant (avec .ics, lien d'annulation), alerte au contact de l'Abside (réponse directe au participant, places restantes), annulation, rappel la veille. Un e-mail en échec n'empêche pas l'inscription.
+  - Annulation par le participant : `/inscription/{jeton}/annuler` (page avec bouton, pour que les robots de messagerie n'annulent pas en suivant le lien).
+  - Tâches planifiées (`routes/console.php`) : `inscriptions:rappels` à 10 h (séances du lendemain), `contacts:purger` à 3 h 30. **En production : cron cPanel `* * * * * php artisan schedule:run`.**
+  - Séances récurrentes : à l'enregistrement, les séances inchangées sont conservées (et donc leurs inscriptions).
+  - Admin : onglet **Inscriptions** sur chaque événement (liste par séance, ajout par téléphone, export Excel), colonne « Inscrits » et action « Inscrits (Excel) » dans la liste des événements, menu **Contacts** (nombre d'événements, dernier événement, date d'ajout, newsletter ; export Excel).
+  - Exports `.xlsx` : `App\Support\Spreadsheet` (OpenSpout) ; les textes ne sont jamais interprétés comme des formules.
 
 ### Pages éditables
 - Admin > **Page d'accueil** (`ManageHome`, clé `home`) : introduction, **quatre blocs** (titre, sous-titre, couleur, lien), qui sommes-nous.
@@ -81,7 +91,7 @@ Repris tels quels de Saint Joseph : connexion par **lien magique** uniquement, c
 ## Feuille de route
 1. **Fondations** — fait : squelette, charte, en-tête et pied de page, accueil, pages éditables, contact, newsletter.
 2. **Événements** — fait : lieux, mots clés (et pages de mot clé), dates ponctuelles ou récurrentes, caractéristiques (6 max), galerie, affiche, partenaires ; agenda (filtres type, mois, mot clé, lieu, carte MapLibre) ; fiche événement ; mises en avant de l'accueil et exergue de l'agenda ; images de partage générées ; JSON-LD ; sitemap.
-3. **Inscriptions et contacts** : formulaire, e-mails Brevo, « Ajouter à mon agenda » (.ics, Google), exports Excel.
+3. **Inscriptions et contacts** — fait : formulaire, jauge par séance, e-mails (confirmation, alerte, rappel la veille, annulation), « Ajouter à mon agenda » (.ics, Google), contacts, exports Excel, purge RGPD.
 4. **Bibliothèque d'images, connecteur Claude (MCP), API, déploiement** (GitHub Action + `deploy.sh`, comme Saint Joseph), reprise des événements des affiches.
 
 ## Déploiement (O2Switch)

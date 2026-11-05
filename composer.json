@@ -18,7 +18,8 @@
         "laravel/mcp": "^1.1",
         "laravel/passport": "^13.10",
         "laravel/tinker": "^3.0",
-        "league/commonmark": "^2.10"
+        "league/commonmark": "^2.10",
+        "openspout/openspout": "^4.32"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

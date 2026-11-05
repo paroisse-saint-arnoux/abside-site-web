@@ -86,6 +86,11 @@ class Event extends Model
         return $this->hasMany(EventDate::class)->orderBy('starts_at');
     }
 
+    public function registrations(): HasMany
+    {
+        return $this->hasMany(\App\Models\Registration::class);
+    }
+
     public function nextDate(): HasOne
     {
         return $this->hasOne(EventDate::class)->ofMany(['starts_at' => 'min'], fn ($q) => $q->upcoming());
@@ -127,6 +132,28 @@ class Event extends Model
             ->take(self::MAX_SPECS)
             ->values()
             ->all();
+    }
+
+    /** Inscription possible en ligne (facultative ou obligatoire). */
+    public function acceptsRegistrations(): bool
+    {
+        return $this->registration !== Registration::None;
+    }
+
+    /**
+     * Places restantes par séance (jauge par date), null si la jauge est illimitée.
+     *
+     * @param  iterable<EventDate>  $dates
+     * @return array<int, ?int> id de séance => places restantes
+     */
+    public function remainingSeats(iterable $dates): array
+    {
+        $ids = collect($dates)->pluck('id');
+        $taken = $this->capacity
+            ? \App\Models\Registration::whereIn('event_date_id', $ids)->groupBy('event_date_id')->selectRaw('event_date_id, sum(seats) as n')->pluck('n', 'event_date_id')
+            : collect();
+
+        return $ids->mapWithKeys(fn ($id) => [$id => $this->capacity ? max(0, $this->capacity - (int) ($taken[$id] ?? 0)) : null])->all();
     }
 
     /** Ligne « Entrée » : participation libre et/ou tarif. */
@@ -190,7 +217,11 @@ class Event extends Model
             }
         }
 
-        $this->dates()->delete();
-        EventDate::insert($rows);
+        // On garde les séances inchangées (et donc leurs inscriptions) ; seules les autres sont remplacées.
+        $key = fn ($start, $end) => Carbon::parse($start)->format('Y-m-d H:i').'|'.($end ? Carbon::parse($end)->format('Y-m-d H:i') : '');
+        $wanted = collect($rows)->keyBy(fn ($r) => $key($r['starts_at'], $r['ends_at']));
+        $existing = $this->dates()->get()->keyBy(fn (EventDate $d) => $key($d->starts_at, $d->ends_at));
+        EventDate::whereIn('id', $existing->diffKeys($wanted)->pluck('id'))->delete();
+        EventDate::insert($wanted->diffKeys($existing)->values()->all());
     }
 }

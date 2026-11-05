@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\Registration;
 use App\Support\ShareImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -12,11 +13,17 @@ class EventController extends Controller
     public function show(Request $request, string $slug)
     {
         $event = $this->find($request, $slug);
+        $upcoming = $event->dates->filter(fn ($d) => ($d->ends_at ?? $d->starts_at->copy()->endOfDay())->isFuture())->values();
+        // Inscription : seules les séances pas encore commencées sont proposées.
+        $bookable = $upcoming->filter(fn ($d) => $d->starts_at->isFuture())->values();
 
         return view('events.show', [
             'event' => $event,
             'dates' => $event->dates,
-            'upcoming' => $event->dates->filter(fn ($d) => ($d->ends_at ?? $d->starts_at->copy()->endOfDay())->isFuture())->values(),
+            'upcoming' => $upcoming,
+            'bookable' => $bookable,
+            'remaining' => $event->acceptsRegistrations() ? $event->remainingSeats($bookable) : [],
+            'registered' => session('registration') ? Registration::where('token', session('registration'))->with(['eventDate', 'contact'])->first() : null,
             'preview' => ! $event->is_published,
         ]);
     }
