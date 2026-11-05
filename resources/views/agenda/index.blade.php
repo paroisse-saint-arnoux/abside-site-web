@@ -10,8 +10,8 @@
         <div class="wrap">
             <h1>Agenda</h1>
             <div class="period-toggle" role="group" aria-label="Période">
-                <a href="{{ $agenda->url(past: false) }}" @class(['active' => ! $agenda->past]) data-agenda-link>À venir</a>
-                <a href="{{ $agenda->url(past: true) }}" @class(['active' => $agenda->past]) data-agenda-link>Passés</a>
+                <a href="{{ $agenda->url(past: false) }}" @class(['active' => ! $agenda->past]) data-agenda-link data-period="upcoming">À venir</a>
+                <a href="{{ $agenda->url(past: true) }}" @class(['active' => $agenda->past]) data-agenda-link data-period="past">Passés</a>
             </div>
         </div>
     </section>

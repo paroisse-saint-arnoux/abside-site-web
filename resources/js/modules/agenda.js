@@ -47,9 +47,19 @@ export async function initAgenda() {
         }
     };
 
+    // « À venir / Passés » est hors de la zone rechargée : ses liens sont recalculés à partir des filtres actuels
+    // (sinon ils garderaient ceux du chargement de la page, et un filtre retiré reviendrait).
     const syncPeriodToggle = (url) => {
-        const past = new URL(url, location.href).searchParams.has('passes');
-        document.querySelectorAll('.period-toggle a').forEach((a, i) => a.classList.toggle('active', past === (i === 1)));
+        const current = new URL(url, location.href);
+        const past = current.searchParams.has('passes');
+        document.querySelectorAll('.period-toggle a[data-period]').forEach((a) => {
+            const target = new URL(current);
+            target.searchParams.delete('nb');
+            target.searchParams.delete('passes');
+            if (a.dataset.period === 'past') target.searchParams.set('passes', '1');
+            a.href = target.pathname + target.search;
+            a.classList.toggle('active', past === (a.dataset.period === 'past'));
+        });
     };
 
     // Liens de filtres (y compris « À venir / Passés » dans le bandeau).
