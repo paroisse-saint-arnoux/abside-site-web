@@ -1,0 +1,24 @@
+// Formulaires du site : champs « pilule », libellés au-dessus.
+.form-site {
+  .field { display: flex; flex-direction: column; gap: 6px; font-size: .95rem; font-weight: 500; }
+  .form-control, .form-select {
+    min-height: 48px; background: $cream; color: $navy; border-color: $navy; font-size: 1rem;
+  }
+  textarea.form-control { border-radius: 20px; min-height: 160px; }
+  .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 20px; }
+  .check { display: flex; gap: 10px; align-items: flex-start; font-size: .95rem; line-height: 1.45; input { width: 20px; height: 20px; margin-top: 1px; flex: none; } }
+  .note { font-size: .875rem; color: $ink-soft; margin-top: 14px; a { text-decoration: underline; } }
+  .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 20px; }
+  .invalid-feedback { display: block; color: #9B2C1C; font-weight: 500; }
+}
+// Bloc newsletter (bande ocre) : champ et bouton sur une ligne.
+.form-inline-site {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;
+  .field { flex: 1 1 200px; }
+}
+.form-feedback { margin-top: 12px; font-size: .95rem; font-weight: 500; &.ok { color: $green; } &.error { color: #9B2C1C; } }
+
+// Pot de miel anti-spam : invisible pour les humains
+.hp-field { position: absolute !important; left: -10000px !important; width: 1px; height: 1px; overflow: hidden; }
+
+.alert-site { background: #fff; border-radius: 20px; padding: 16px 20px; margin-bottom: 22px; font-weight: 500; &.ok { box-shadow: inset 0 0 0 2px $green; color: $green; } }

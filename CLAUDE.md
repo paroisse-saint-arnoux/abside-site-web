@@ -1,0 +1,81 @@
+# CLAUDE.md — Site de L'Abside
+
+Site de **L'Abside**, centre culturel et touristique catholique des Alpes-Maritimes (association, SIREN 992 749 168, 23 avenue Sévigné, 06100 Nice) : agenda d'événements culturels dans des lieux de culte (théâtre, conférences, concerts, expositions, visites guidées, événements).
+Production prévue : **https://abside-culture.fr** — hébergement mutualisé **O2Switch** (même fonctionnement que le site Saint Joseph, `~/perso/saint-joseph`, dont ce projet reprend la stack et les briques).
+
+Ce fichier consigne les décisions prises avec Bertrand Gorge. **Le tenir à jour** à chaque nouvelle décision.
+
+Maquettes validées (piste **Façade**) et planche « Structure » qui sert de cahier des charges : https://claude.ai/artifact/QxpvWrdwNZ7FkJBSikqp3P (fichiers `C-*.dc.html`).
+
+## Stack
+
+- **Laravel 13** + **Filament 5** (admin en français, `/admin`), Livewire 4, Passport (prévu pour le connecteur Claude et l'API).
+- Front : Blade + **SCSS + Bootstrap 5.3** (import sélectif), Vite, JS vanilla en modules.
+- Polices auto-hébergées : **Marcellus** (titres) et **Figtree** (texte), via `@fontsource`. Pas de Google Fonts.
+- Images : `App\Support\Images` (redimensionnement 1920 px max, WebP).
+- Markdown : `App\Support\Markdown` (`league/commonmark` GFM, HTML brut autorisé, vidéos YouTube intégrées).
+
+## Développement (Docker)
+
+```bash
+docker compose up -d                       # app :8090, MySQL :3310, Mailpit :8026, DbGate :3001
+docker compose exec -u www-data -e HOME=/tmp app php artisan migrate
+docker compose exec -u www-data -e HOME=/tmp app php artisan test
+npm install && npm run dev                 # ou : docker compose --profile front up node (port 5174)
+npm run build                              # build de production dans public/build
+```
+
+- Ports choisis pour ne pas entrer en conflit avec les autres projets locaux (okovision occupe 3000, 3306, 8080, 8081).
+- Lancer PHP/Composer/artisan **dans le conteneur**.
+- Emails en local : Mailpit http://localhost:8026. Admin local : http://localhost:8090/admin (lien magique dans Mailpit), ou `php artisan admin:lien` pour un lien direct (hors production).
+- `Assets et photos/` : photos, affiches et logos bruts fournis par le client, **hors git** (lourds). Les images utiles au site sont copiées, redimensionnées, dans `public/images/`.
+
+## Décisions
+
+### Identité (piste Façade)
+- Ocre `#E9BE4A`, crème `#FDF8EC`, bleu nuit du logo `#152E47`. Une couleur par type (texte blanc dessus) : théâtre `#1F4E8C`, conférence `#B4492C`, concert `#6A3D7C`, expo `#7A5A12`, visite guidée `#2F5D50`, événement `#152E47` (`App\Enums\EventType::color()` et `$type-colors` dans `_variables.scss`, à garder identiques).
+- Motif de la voûte du logo : images et blocs aux coins supérieurs en plein cintre.
+- Logo : `public/images/logo-abside.svg` (bleu) et `logo-abside-blanc.svg`. Le fichier source blanc (`L'abside_Blanc.svg`) n'a pas le même cadrage que la version bleue (dessin décalé d'environ 20 unités vers le haut) : son `viewBox` est recadré sur son propre dessin (`100.5 120 412 290`).
+
+### Navigation
+- En-tête : logo, « Tout l'agenda », bouton « Soutenir », puis les **six types** en grand (Théâtre, Conférences, Concerts, Expo, Visites guidées, Événements = tout le reste) → agenda filtré (`/agenda?type=…`).
+- Pied de page : Qui sommes-nous, Contact et presse, Soutenir l'association, réseaux, coordonnées, mentions légales, confidentialité.
+- Bande « Recevoir les informations de L'Abside » (newsletter) sur chaque page.
+
+### Contact
+- **Un seul contact pour tout le site** (décision du 05/11/2026) : abside.association@gmail.com, 06 14 47 30 42, y compris pour les événements signés « Service Culture du diocèse ». Toutes les inscriptions arrivent sur ce Gmail.
+- Expéditeur des e-mails : une adresse du domaine (`contact@abside-culture.fr`), authentifiée chez Brevo (SPF/DKIM) ; réponse vers le Gmail. Envoyer « depuis » le Gmail via Brevo échouerait aux contrôles DMARC.
+
+### Inscriptions (décisions du 05/11/2026)
+- **Réglable par événement** : inscription désactivée, facultative ou obligatoire, jauge facultative ; jauge atteinte → formulaire fermé, « Complet ». Pas de liste d'attente.
+- **Rappel automatique la veille** (e-mail Brevo : date, heure, adresse, lien Google Maps), par tâche planifiée (cron cPanel).
+- **RGPD** : inscriptions et contacts conservés **3 ans après la dernière participation**, puis supprimés automatiquement.
+
+### Pages éditables
+- Admin > **Page d'accueil** (`ManageHome`, clé `home`) : introduction, **quatre blocs** (titre, sous-titre, couleur, lien), qui sommes-nous.
+- Admin > **Réglages du site** (`ManageSite`) : coordonnées (`site`), pages Qui sommes-nous / Soutenir / Presse (`pages`), pages légales (`legal`).
+- Contenu de départ posé par la migration `seed_initial_content` → `InitialContentSeeder` (idempotent, ignoré en tests).
+
+### Formulaires
+- Newsletter : **Brevo** API (`App\Services\Brevo`, `BREVO_API_KEY`, `BREVO_LIST_ID`), sans double opt-in.
+- Contact : e-mail à `CONTACT_EMAIL`, reply-to = visiteur, non stocké.
+- Anti-spam (`App\Support\SpamGuard`, partial `partials/spam-guard`) : champ piège + horodatage chiffré + Turnstile facultatif.
+
+### Admin & accès
+Repris tels quels de Saint Joseph : connexion par **lien magique** uniquement, connexion de 400 jours, rôles admin / editor, liste blanche `users`, barre Enregistrer / Annuler fixée seulement en cas de modifications non enregistrées.
+
+## Feuille de route
+1. **Fondations** — fait : squelette, charte, en-tête et pied de page, accueil, pages éditables, contact, newsletter.
+2. **Événements** : lieux, mots clés (et pages de mot clé), dates ponctuelles ou récurrentes, caractéristiques (6 max), galerie, affiche, partenaires ; agenda (filtres type, mois, mot clé, lieu, carte MapLibre) ; fiche événement ; mises en avant de l'accueil et exergue de l'agenda ; images de partage générées ; JSON-LD ; sitemap.
+3. **Inscriptions et contacts** : formulaire, e-mails Brevo, « Ajouter à mon agenda » (.ics, Google), exports Excel.
+4. **Bibliothèque d'images, connecteur Claude (MCP), API, déploiement** (GitHub Action + `deploy.sh`, comme Saint Joseph), reprise des événements des affiches.
+
+## Déploiement (O2Switch)
+Même principe que Saint Joseph : GitHub Action sur `main` (tests, build, branche `production`), `./deploy.sh` côté serveur (git, composer, migrations, caches). Toute évolution de schéma ou de contenu initial passe par une migration.
+
+## Conventions de code
+- Code et commentaires en français pour le métier ; classes et méthodes en anglais (Laravel).
+- Attributs PHP Laravel 13 (`#[Fillable]`, `#[Hidden]`) sur les modèles.
+- Styles : variables de charte dans `resources/scss/_variables.scss`, un partial par zone.
+- Blade : ne pas utiliser `@js(...)` dans un attribut de composant Filament.
+- Tests : `tests/Feature` (SQLite mémoire), à lancer avant chaque commit.

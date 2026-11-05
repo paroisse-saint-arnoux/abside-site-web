@@ -1,0 +1,9 @@
+# Filet de sécurité si la racine du domaine ne peut pas pointer vers public/ :
+# toutes les requêtes sont redirigées vers public/. (Configuration recommandée :
+# racine du sous-domaine = dossier public/ dans cPanel, ce fichier est alors ignoré.)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Validation des certificats SSL (AutoSSL de cPanel) : ne pas rediriger.
+    RewriteRule ^\.well-known/acme-challenge/ - [L]
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

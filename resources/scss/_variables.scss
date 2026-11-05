@@ -1,0 +1,54 @@
+// Charte « Façade » : ocre niçois, bleu nuit du logo, voûte du logo en motif.
+$ochre: #E9BE4A;
+$ochre-soft: #F4DE9E;
+$cream: #FDF8EC;
+$paper: #FFFFFF;
+$navy: #152E47;
+$navy-line: #3B5672;
+$night: #0E1A26;
+$ink: $navy;
+$ink-soft: #4D5866;
+$line: #D8CFB8;
+
+// Une couleur par type d'événement (texte blanc dessus : contraste ≥ 4,5:1).
+$blue: #1F4E8C;    // théâtre
+$brick: #B4492C;   // conférences
+$green: #2F5D50;   // visites guidées
+$plum: #6A3D7C;    // concerts
+$bronze: #7A5A12;  // expositions
+$type-colors: (theatre: $blue, conference: $brick, concert: $plum, expo: $bronze, visite: $green, evenement: $navy);
+
+$font-display: 'Marcellus', Georgia, 'Times New Roman', serif;
+$font-body: 'Figtree Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+$maxw: 1280px;
+$gutter: 40px;
+$gutter-mobile: 16px;
+$ease: cubic-bezier(.22, .61, .36, 1);
+
+// Surcharges Bootstrap
+$primary: $navy;
+$secondary: $ochre;
+$body-bg: $cream;
+$body-color: $ink;
+$font-family-base: $font-body;
+$font-size-base: 1.0625rem;
+$line-height-base: 1.6;
+$headings-font-family: $font-display;
+$headings-font-weight: 400;
+$headings-line-height: 1.12;
+$headings-margin-bottom: 0;
+$link-color: $navy;
+$link-decoration: none;
+$link-hover-decoration: none;
+$border-radius: 24px;
+$input-border-color: $navy;
+$input-focus-border-color: $blue;
+$input-focus-box-shadow: 0 0 0 .2rem rgba($blue, .2);
+$input-padding-y: .7rem;
+$input-padding-x: 1rem;
+$input-border-radius: 24px;
+$modal-content-bg: $cream;
+$modal-content-border-radius: 24px;
+$modal-backdrop-bg: $night;
+$modal-backdrop-opacity: .6;
+$enable-smooth-scroll: true;

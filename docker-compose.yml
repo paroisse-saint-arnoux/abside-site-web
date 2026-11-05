@@ -1,0 +1,67 @@
+# Stack de développement local. Voir CLAUDE.md pour les commandes.
+services:
+  app:
+    build:
+      context: docker/php
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    image: abside-php
+    ports:
+      - "8090:80"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - db
+      - mailpit
+
+  db:
+    # O2Switch fournit MySQL.
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: abside
+      MYSQL_USER: abside
+      MYSQL_PASSWORD: abside
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3310:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "8026:8025"
+
+  # Interface web d'exploration de la base : http://localhost:3000
+  dbgate:
+    image: dbgate/dbgate
+    ports:
+      - "3001:3000"
+    environment:
+      CONNECTIONS: abside
+      LABEL_abside: L'Abside (MySQL locale)
+      SERVER_abside: db
+      PORT_abside: 3306
+      USER_abside: abside
+      PASSWORD_abside: abside
+      DATABASE_abside: abside
+      ENGINE_abside: mysql@dbgate-plugin-mysql
+    volumes:
+      - dbgate:/root/.dbgate
+    depends_on:
+      - db
+
+  node:
+    image: node:22-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    ports:
+      - "5174:5173"
+    profiles: ["front"]
+
+volumes:
+  mysqldata:
+  dbgate:

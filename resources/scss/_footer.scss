@@ -1,0 +1,21 @@
+// Lettre d'information (bande ocre) puis pied de page bleu nuit.
+.newsletter-band {
+  background: $ochre; padding: 56px 0;
+  .wrap { display: flex; flex-wrap: wrap; gap: 32px 64px; justify-content: space-between; align-items: flex-end; }
+  h2 { flex: 1 1 360px; font-size: clamp(1.8rem, 3vw, 2.25rem); line-height: 1.2; }
+  p { margin: 10px 0 0; max-width: 520px; }
+  form { flex: 1 1 520px; }
+}
+
+.site-footer {
+  background: $navy; color: #fff; padding: 48px 0 32px; font-size: .95rem; line-height: 1.5;
+  a { color: #fff; &:hover { text-decoration: underline; text-underline-offset: 4px; } }
+  .foot-top { display: flex; flex-wrap: wrap; gap: 32px 64px; justify-content: space-between; align-items: flex-start; }
+  .foot-logo { display: block; height: 72px; width: auto; }
+  .foot-links { display: flex; flex-wrap: wrap; gap: 8px 32px; font-size: 1rem; font-weight: 500; }
+  .foot-bot {
+    margin-top: 32px; padding-top: 20px; border-top: 1px solid $navy-line;
+    display: flex; flex-wrap: wrap; gap: 8px 32px; justify-content: space-between; font-size: .875rem;
+  }
+  @media (max-width: 700px) { .foot-links { flex-direction: column; gap: 0; a { padding: 10px 0; } } }
+}
