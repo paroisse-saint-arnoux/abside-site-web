@@ -12,7 +12,7 @@ Maquettes validées (piste **Façade**) et planche « Structure » qui sert de c
 - **Laravel 13** + **Filament 5** (admin en français, `/admin`), Livewire 4, Passport (prévu pour le connecteur Claude et l'API).
 - Front : Blade + **SCSS + Bootstrap 5.3** (import sélectif), Vite, JS vanilla en modules.
 - Polices auto-hébergées : **Marcellus** (titres) et **Figtree** (texte), via `@fontsource`. Pas de Google Fonts.
-- Images : `App\Support\Images` (redimensionnement 1920 px max, WebP).
+- Images : `App\Support\Images` (redimensionnement 1920 px max, WebP). **Original gardé** sur le disque privé (`storage/app/private/image-sources/…`, même nom que la copie, + `.json` : largeur max, dernière retouche). « Recadrer / pivoter » (Cropper.js, `filament/image-cropper`) repart toujours de l'original et crée une copie sous un nouveau nom. Une image remplacée ou retirée (événement, mot clé, réglage) est supprimée avec son original à l'enregistrement, sauf si une autre fiche l'utilise encore (`Images::cleanup`, `isUsed`). Champ `App\Filament\Forms\ImageUpload` : glisser-déposer sur tout le champ et bouton « Remplacer » (`resources/js/admin/images.js`).
 - Markdown : `App\Support\Markdown` (`league/commonmark` GFM, HTML brut autorisé, vidéos YouTube intégrées).
 
 ## Développement (Docker)
@@ -50,6 +50,7 @@ npm run build                              # build de production dans public/bui
 - Modèle : `Event` (type, lieu, mots clés, chapô, description Markdown, photo, affiche, galerie, **caractéristiques** clé/valeur ≤ 6, partenaires, entrée, inscription, mise en avant, exergue, brouillon/publié + lien d'aperçu), `EventDate` (**une ligne par séance**, sous-titre facultatif), `Place` (nom, adresse, GPS), `Keyword` (page facultative).
 - Dates : séances saisies une à une, ou **horaires récurrents** (période, jours, créneaux, fermetures) → séances générées à chaque enregistrement (`Event::regenerateRecurringDates`).
 - Lieux : coordonnées GPS recherchées automatiquement à partir de l'adresse (`App\Support\Geocoder`, API Adresse de l'État, gratuite).
+- Ligne de résultat de l'agenda : 125 px de haut (bloc date 100 px, visuel 220 × 125 recadré au centre).
 - **Agenda** (`/agenda`, `App\Support\Agenda`) : filtres type, mois, mot clé, lieu, zone de carte (`?type=&mois=&mot-cle=&lieu=&zone=&passes=1`), filtrés en mémoire ; chaque filtre compte ses résultats avec les autres filtres actifs. Sans JS : liens et formulaire ; avec JS (`resources/js/modules/agenda.js`) : rechargement partiel (en-tête `X-Agenda: 1` → JSON). Filtres de zone, de lieu ou de mois en `noindex`.
 - **Carte** : MapLibre GL + tuiles **OpenFreeMap** (style positron, gratuites, sans clé), couleurs retouchées à la charte. Déplacer ou zoomer ajoute « Recherche par lieu » ; le retirer recentre sur tous les lieux. Sans WebGL, la carte est masquée.
 - **Accueil** : « À ne pas manquer » = `Event::featuredForHome()` (4 à venir : cochés « Mettre en avant » par date de fin la plus proche, complétés par les prochains) ; bandeau de nuit facultatif (`home.highlight`).
@@ -76,9 +77,12 @@ npm run build                              # build de production dans public/bui
   - Exports `.xlsx` : `App\Support\Spreadsheet` (OpenSpout) ; les textes ne sont jamais interprétés comme des formules.
 
 ### Pages éditables
-- Admin > **Page d'accueil** (`ManageHome`, clé `home`) : introduction, **quatre blocs** (titre, sous-titre, couleur, lien), qui sommes-nous.
+- Admin > **Page d'accueil** (`ManageHome`, clé `home`) : introduction, **quatre blocs** (titre, sous-titre, couleur parmi les six des types, lien), qui sommes-nous. Blocs : formulaire à gauche, aperçu à droite ; on peut coller l'adresse complète d'une recherche (`ManageHome::normalizeUrl` garde le chemin et, pour l'agenda, les seuls filtres) ; bouton pour tester le lien.
 - Admin > **Réglages du site** (`ManageSite`) : coordonnées (`site`), pages Qui sommes-nous / Soutenir / Presse (`pages`), pages légales (`legal`).
 - Contenu de départ posé par la migration `seed_initial_content` → `InitialContentSeeder` (idempotent, ignoré en tests).
+
+### Indexation
+- `robots.txt` est une route : seule `abside-culture.fr` (`config('app.public_host')`) est indexable ; sur une autre adresse (recette `abside.saint-arnoux.fr`), robots.txt interdit tout et les pages sont en `noindex`.
 
 ### Formulaires
 - Newsletter : **Brevo** API (`App\Services\Brevo`, `BREVO_API_KEY`, `BREVO_LIST_ID`), sans double opt-in.

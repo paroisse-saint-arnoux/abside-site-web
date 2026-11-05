@@ -39,7 +39,10 @@ class Setting extends Model
 
     public static function put(string $key, array $value): void
     {
+        $before = static::find($key)?->value ?? [];
         static::updateOrCreate(['key' => $key], ['value' => $value]);
         self::$cache[$key] = $value;
+        // Images remplacées ou retirées : copie et original supprimés (s'ils ne servent plus ailleurs).
+        \App\Support\Images::cleanup($before, $value);
     }
 }

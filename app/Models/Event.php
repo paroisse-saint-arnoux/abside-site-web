@@ -50,6 +50,13 @@ class Event extends Model
 
     protected static function booted(): void
     {
+        // Images remplacées ou retirées (ou fiche supprimée) : copie et original supprimés s'ils ne servent plus ailleurs.
+        static::saved(fn ($model) => \App\Support\Images::cleanup(
+            \Illuminate\Support\Arr::only($model->getOriginal(), ['image', 'poster', 'gallery', 'partners']),
+            \Illuminate\Support\Arr::only($model->attributesToArray(), ['image', 'poster', 'gallery', 'partners']),
+        ));
+        static::deleted(fn ($model) => \App\Support\Images::cleanup(\Illuminate\Support\Arr::only($model->attributesToArray(), ['image', 'poster', 'gallery', 'partners']), []));
+
         static::creating(function (Event $event) {
             $event->preview_token ??= Str::random(40);
         });

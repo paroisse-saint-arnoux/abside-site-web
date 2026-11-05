@@ -17,6 +17,13 @@ class Keyword extends Model
 
     protected static function booted(): void
     {
+        // Images remplacées ou retirées (ou fiche supprimée) : copie et original supprimés s'ils ne servent plus ailleurs.
+        static::saved(fn ($model) => \App\Support\Images::cleanup(
+            \Illuminate\Support\Arr::only($model->getOriginal(), ['image', 'gallery']),
+            \Illuminate\Support\Arr::only($model->attributesToArray(), ['image', 'gallery']),
+        ));
+        static::deleted(fn ($model) => \App\Support\Images::cleanup(\Illuminate\Support\Arr::only($model->attributesToArray(), ['image', 'gallery']), []));
+
         static::saving(function (Keyword $keyword) {
             $keyword->slug = filled($keyword->slug) ? Str::slug($keyword->slug) : Str::slug($keyword->name);
         });

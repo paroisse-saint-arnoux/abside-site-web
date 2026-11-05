@@ -1,3 +1,4 @@
+@vite(['resources/js/admin/images.js'])
 <style>
     /* Barre « Enregistrer / Annuler » fixée en bas (pages avec $formActionsAreSticky) : seulement quand le
        formulaire a des modifications non enregistrées. Sinon, elle reste à sa place, en bas du formulaire. */
@@ -37,3 +38,14 @@
         schedule();
     })();
 </script>
+<style>
+    /* Champs image : bouton « Remplacer » et zone de dépôt (resources/js/admin/images.js). */
+    [data-image-upload] { position: relative; }
+    [data-image-upload] .ab-replace-btn {
+        display: none; position: absolute; z-index: 10; left: 50%; bottom: 12px; transform: translateX(-50%);
+        padding: 6px 14px; border-radius: 999px; border: 0; background: rgba(21, 46, 71, .88); color: #fff; font-size: .8rem; font-weight: 600;
+    }
+    [data-image-upload].ab-has-image .ab-replace-btn { display: block; }
+    [data-image-upload].ab-drop { outline: 3px dashed #1F4E8C; outline-offset: 4px; border-radius: 12px; }
+    [data-image-upload].ab-drop .filepond--root { opacity: .6; }
+</style>

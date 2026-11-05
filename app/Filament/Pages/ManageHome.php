@@ -3,13 +3,21 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Forms\ImageUpload;
-use Filament\Forms\Components\ColorPicker;
+use App\Enums\EventType;
+use App\Support\Agenda;
+use Filament\Actions\Action;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Text;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Illuminate\Support\HtmlString;
 use Filament\Support\Icons\Heroicon;
 
 class ManageHome extends SettingsPage
@@ -26,8 +34,54 @@ class ManageHome extends SettingsPage
 
     protected array $settingKeys = ['home'];
 
-    /** Couleurs de la charte proposées pour les blocs (texte blanc dessus). */
-    public const COLORS = ['#1F4E8C', '#B4492C', '#2F5D50', '#6A3D7C', '#7A5A12', '#152E47'];
+    /** Couleurs des blocs : celles des six types d'événement (texte blanc dessus). */
+    public static function colorOptions(): array
+    {
+        return collect(EventType::cases())->mapWithKeys(fn (EventType $t) => [$t->color() => '<span style="display:inline-flex;align-items:center;gap:8px">'
+            .'<span style="width:16px;height:16px;border-radius:4px;background:'.$t->color().'"></span>'.e($t->label()).'</span>'])->all();
+    }
+
+    /**
+     * Lien d'un bloc : une adresse complète du site (copiée depuis le navigateur) est ramenée à son chemin ;
+     * pour l'agenda, seuls les filtres de recherche sont gardés (pas la pagination ni le reste).
+     */
+    public static function normalizeUrl(?string $url): ?string
+    {
+        $url = trim((string) $url);
+        if ($url === '') {
+            return null;
+        }
+        $parts = parse_url($url);
+        $host = $parts['host'] ?? null;
+        $path = '/'.ltrim($parts['path'] ?? '', '/');
+        $ours = $host === null || in_array($host, [parse_url(config('app.url'), PHP_URL_HOST), config('app.public_host'), 'www.'.config('app.public_host')], true)
+            || str_starts_with($path, '/agenda') || str_starts_with($path, '/mot-cle/');
+        if (! $ours) {
+            return $url; // lien vers un autre site : gardé tel quel
+        }
+
+        parse_str($parts['query'] ?? '', $query);
+        if (rtrim($path, '/') === '/agenda') {
+            $query = array_filter(\Illuminate\Support\Arr::only($query, [...Agenda::FILTERS, 'passes']), fn ($v) => $v !== '' && $v !== null);
+
+            return '/agenda'.($query ? '?'.http_build_query($query) : '');
+        }
+
+        return rtrim($path, '/') ?: '/';
+    }
+
+    /** Aperçu des quatre blocs, comme sur la page d'accueil (styles en ligne : l'admin n'a pas la feuille du site). */
+    public static function doorsPreview(array $doors): HtmlString
+    {
+        $html = collect($doors)->map(fn ($d) => '<div style="min-height:210px;padding:70px 16px 18px;border-radius:90px 90px 0 0;color:#fff;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;background:'
+            .e($d['color'] ?? '#152E47').'"><div style="font-family:Marcellus,Georgia,serif;font-size:1.35rem;line-height:1.2">'.e($d['title'] ?? '').'</div>'
+            .(filled($d['subtitle'] ?? null) ? '<div style="font-size:.85rem;line-height:1.45;opacity:.95">'.e($d['subtitle']).'</div>' : '')
+            .'<div style="font-size:.7rem;opacity:.7;word-break:break-all">'.e($d['url'] ?? '').'</div></div>')->implode('');
+
+        return new HtmlString('<div style="background:#FDF8EC;border-radius:12px;padding:18px">'
+            .'<div style="font-size:.8rem;font-weight:600;color:#4D5866;margin-bottom:12px">Aperçu</div>'
+            .'<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px">'.$html.'</div></div>');
+    }
 
     protected function formComponents(): array
     {
@@ -41,19 +95,29 @@ class ManageHome extends SettingsPage
             ]),
 
             Section::make('Les quatre blocs')
-                ->description('Chaque bloc mène à l\'agenda filtré (type ou mot clé) ou à une page de mot clé.')
+                ->description('Chaque bloc mène à l\'agenda filtré (type ou mot clé) ou à une page de mot clé. Vous pouvez coller l\'adresse complète d\'une recherche faite sur le site.')
                 ->schema([
-                    Repeater::make('home.doors')->hiddenLabel()
-                        ->schema([
-                            TextInput::make('title')->label('Titre')->required(),
-                            TextInput::make('subtitle')->label('Sous-titre'),
-                            ColorPicker::make('color')->label('Couleur')->required()
-                                ->helperText('Charte : '.implode(' · ', self::COLORS)),
-                            TextInput::make('url')->label('Lien')->required()
-                                ->helperText('Ex. /agenda?type=theatre ou /mot-cle/nuit-des-eglises'),
-                        ])
-                        ->columns(2)->minItems(4)->maxItems(4)
-                        ->reorderableWithDragAndDrop()->addable(false)->deletable(false),
+                    Grid::make(['default' => 1, 'lg' => 2])->schema([
+                        Repeater::make('home.doors')->hiddenLabel()
+                            ->schema([
+                                TextInput::make('title')->label('Titre')->required()->live(onBlur: true),
+                                TextInput::make('subtitle')->label('Sous-titre')->live(onBlur: true),
+                                Select::make('color')->label('Couleur')->required()->native(false)->allowHtml()->live()
+                                    ->options(self::colorOptions()),
+                                TextInput::make('url')->label('Lien')->required()->live(onBlur: true)
+                                    ->placeholder('/agenda?type=theatre')
+                                    ->helperText('Ex. /agenda?type=theatre, /mot-cle/nuit-des-eglises, ou l\'adresse complète copiée depuis le navigateur.')
+                                    ->afterStateUpdated(fn (?string $state, Set $set) => $set('url', self::normalizeUrl($state)))
+                                    ->dehydrateStateUsing(fn (?string $state) => self::normalizeUrl($state))
+                                    ->suffixAction(Action::make('testUrl')->icon(Heroicon::OutlinedArrowTopRightOnSquare)->tooltip('Tester le lien')
+                                        ->url(fn (?string $state) => filled($state) ? url(self::normalizeUrl($state)) : null)->openUrlInNewTab()),
+                            ])
+                            ->itemLabel(fn (array $state) => $state['title'] ?? null)
+                            ->collapsible()->minItems(4)->maxItems(4)
+                            ->reorderableWithDragAndDrop()->addable(false)->deletable(false),
+                        Text::make(fn (Get $get) => self::doorsPreview($get('home.doors') ?? []))
+                            ->extraAttributes(['style' => 'position: sticky; top: 5rem; align-self: start']),
+                    ]),
                 ]),
 
             Section::make('À ne pas manquer')
