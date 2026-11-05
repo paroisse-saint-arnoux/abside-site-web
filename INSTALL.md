@@ -62,6 +62,19 @@ Laisser `APP_ENV=production` et `APP_DEBUG=false`. Il n'y a pas de file d'attent
 
 Si la commande `php` du terminal n'est pas en version 8.5, lancer le script avec le bon binaire, par exemple `PHP=/opt/alt/php85/usr/bin/php ./deploy.sh`. Il faudra alors utiliser le même chemin dans le cron.
 
+### Démarrer avec le contenu préparé en local (facultatif)
+Sans rien importer, le premier `./deploy.sh` crée de lui-même le contenu de départ (pages, saison 2026-2027, images), à partir des migrations.
+Pour reprendre exactement le contenu de la base locale, procéder ainsi **avant** le premier `./deploy.sh` :
+
+```bash
+mysql -u UTILISATEUR -p NOM_DE_LA_BASE < abside-demarrage.sql     # base vide : structure, contenu, migrations déjà marquées
+mkdir -p storage/app/public && tar -xzf abside-images.tar.gz -C storage/app/public
+./deploy.sh                                                       # « Nothing to migrate » : le contenu importé est conservé
+```
+
+Le SQL ne contient ni sessions, ni cache, ni jetons, ni inscriptions. Il inclut l'administrateur local.
+Les images de partage (`storage/app/public/partage`) sont recréées à la première visite.
+
 ### Première connexion à l'admin
 Aller sur https://abside-culture.fr/admin et saisir l'adresse `ADMIN_EMAIL` : un lien de connexion arrive par e-mail. Il n'y a pas de mot de passe.
 Les autres personnes sont ajoutées ensuite dans **Admin → Utilisateurs**.
