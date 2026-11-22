@@ -13,6 +13,26 @@
     RewriteCond %{HTTP:x-xsrf-token} .
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
 
+    # Adresse unique en production : https://abside-culture.fr (les autres hôtes, dont le local, ne sont pas concernés).
+    # - THE_REQUEST et non REQUEST_URI : celui-ci vaut /public/... quand la racine du domaine est le dossier du projet.
+    #   On n'en garde que le chemin : Apache reporte les paramètres (et répond 403 si le « ? » vient d'une variable).
+    # - Plusieurs indices de HTTPS : O2Switch place un proxy devant Apache, un seul risquerait la boucle.
+    # - La validation des certificats (Let's Encrypt, AutoSSL) reste en HTTP.
+    #
+    # 1. www, en HTTP comme en HTTPS : vers le domaine sans www, en un seul saut.
+    RewriteCond %{THE_REQUEST} !\s/\.well-known/(acme-challenge|pki-validation|cpanel-dcv)/
+    RewriteCond %{HTTP_HOST}\ %{THE_REQUEST} ^www\.abside-culture\.fr\.?(?::\d+)?\s[A-Z]+\s(/[^\s?]*) [NC]
+    RewriteRule ^ https://abside-culture.fr%1 [L,NE,R=301]
+
+    # 2. Domaine sans www, en HTTP : vers HTTPS.
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{ENV:HTTPS} !=on
+    RewriteCond %{SERVER_PORT} !=443
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteCond %{THE_REQUEST} !\s/\.well-known/(acme-challenge|pki-validation|cpanel-dcv)/
+    RewriteCond %{HTTP_HOST}\ %{THE_REQUEST} ^abside-culture\.fr\.?(?::\d+)?\s[A-Z]+\s(/[^\s?]*) [NC]
+    RewriteRule ^ https://abside-culture.fr%1 [L,NE,R=301]
+
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$

@@ -84,7 +84,7 @@ npm run build                              # build de production dans public/bui
 - Contenu de départ posé par la migration `seed_initial_content` → `InitialContentSeeder` (idempotent, ignoré en tests).
 
 ### Indexation
-- `robots.txt` est une route : seule `abside-culture.fr` (`config('app.public_host')`) est indexable ; sur une autre adresse (recette `abside.saint-arnoux.fr`), robots.txt interdit tout et les pages sont en `noindex`.
+- `robots.txt` est une route : seule `abside-culture.fr` (`config('app.public_host')`) est indexable ; si `APP_URL` porte une autre adresse, robots.txt interdit tout et les pages sont en `noindex` (le test porte sur `APP_URL`, pas sur l'hôte demandé). L'ancienne adresse de recette `abside.saint-arnoux.fr` est abandonnée (décision du 22/11/2026).
 
 ### Statistiques
 - **Matomo** auto-hébergé (`https://matomo.saint-arnoux.fr/`, site n° 4), repris de Saint Joseph : suivi sans cookie (`partials/matomo`, en production seulement), changements de filtre de l'agenda comptés comme pages vues ; tableau de bord de l'admin (`App\Services\Matomo`, widgets visites, graphique, pages les plus vues) avec `MATOMO_TOKEN`. Mentionné dans la politique de confidentialité.
@@ -106,6 +106,8 @@ Repris tels quels de Saint Joseph : connexion par **lien magique** uniquement, c
 ## Déploiement (O2Switch)
 Procédure complète (comptes, `.env`, crons, mises à jour) : [INSTALL.md](INSTALL.md).
 **Différent de Saint Joseph** (décision du 05/11/2026) : pas de branche `production`, le serveur suit **`main`**. `public/build` est **versionné** (pas de npm sur le serveur) : lancer `npm run build` et commiter `public/build` après toute modification SCSS/JS (l'Action « Tests » échoue sinon). Mise en ligne à la main en SSH : `./deploy.sh` (git pull, composer, migrations, caches). Toute évolution de schéma ou de contenu initial passe par une migration.
+
+**Adresse unique `https://abside-culture.fr`** (décisions du 22/11/2026) : redirections 301 dans `public/.htaccess`, de HTTP vers HTTPS et de `www` vers le domaine sans `www`, en un seul saut, pour ce domaine seulement. Elles doivent fonctionner avec une racine web sur `public/` **ou** sur le dossier du projet (d'où `THE_REQUEST`, pas `REQUEST_URI`). Sans HSTS pour l'instant.
 
 ## Conventions de code
 - Code et commentaires en français pour le métier ; classes et méthodes en anglais (Laravel).

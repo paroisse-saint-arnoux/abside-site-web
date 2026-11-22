@@ -15,6 +15,8 @@ serveur O2Switch : ./deploy.sh  →  git pull main, composer install, migrations
 ### O2Switch (cPanel)
 1. **Domaine** : `abside-culture.fr` rattaché à l'hébergement. Sa racine (« Document Root ») pointe vers le dossier **`public`** du site, par exemple `~/abside-culture.fr/public`.
 2. **HTTPS** : certificat Let's Encrypt via « Let's Encrypt SSL » ou « AutoSSL ».
+   Les redirections de HTTP vers HTTPS et de `www` vers le domaine sans `www` sont dans `public/.htaccess` (domaine de production seulement) : rien à activer dans cPanel. Le certificat doit continuer de couvrir `www`.
+   Pour vérifier : `curl -I http://abside-culture.fr/agenda` et `curl -I https://www.abside-culture.fr/agenda` doivent répondre `301` vers `https://abside-culture.fr/agenda`.
 3. **Base MySQL** : dans « Bases de données MySQL », créer une base, un utilisateur et son mot de passe, puis donner **tous les privilèges** à l'utilisateur sur la base.
 4. **Version de PHP** : 8.5 pour le domaine, dans « Sélecteur de version PHP » ou « MultiPHP ». Extensions nécessaires : `gd`, `intl`, `zip`, `exif`, `bcmath`, `pdo_mysql`, `fileinfo`.
 5. **SSH** : dans « Autorisation SSH », ajouter son adresse IP. L'accès SSH est limité aux IP autorisées.
