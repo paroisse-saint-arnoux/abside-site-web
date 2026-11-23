@@ -11,13 +11,17 @@
     };
     $place = $event->place;
     $site = Setting::get('site', []);
+    $organizer = array_filter(['@type' => 'Organization', '@id' => \App\Support\StructuredData::organizationId(), 'name' => config('app.name'), 'url' => route('home'), 'email' => $site['email'] ?? null]);
+    // Sans artiste ni intervenant dans les caractéristiques, c'est l'association qui « présente ».
+    $performers = $event->performers() ?: [$organizer];
     $items = ($upcoming->isNotEmpty() ? $upcoming : $dates->take(-1))->take(20)->map(fn ($d) => array_filter([
         '@context' => 'https://schema.org',
         '@type' => $schemaType,
         'name' => $d->label ? $event->title.' — '.$d->label : $event->title,
         'description' => $event->intro,
         'startDate' => $d->starts_at->toIso8601String(),
-        'endDate' => $d->ends_at?->toIso8601String(),
+        // Sans heure de fin : 2 heures après le début, comme pour les agendas.
+        'endDate' => $d->endsAtOrDefault()->toIso8601String(),
         'eventStatus' => 'https://schema.org/EventScheduled',
         'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode',
         'image' => array_values(array_filter([$event->shareImageUrl(), $event->image ? Storage::url($event->image) : null])),
@@ -29,11 +33,13 @@
             'address' => ['@type' => 'PostalAddress', 'streetAddress' => $place->address, 'postalCode' => $place->postal_code, 'addressLocality' => $place->city, 'addressCountry' => 'FR'],
             'geo' => $place->hasCoordinates() ? ['@type' => 'GeoCoordinates', 'latitude' => $place->latitude, 'longitude' => $place->longitude] : null,
         ]) : null,
-        'organizer' => array_filter(['@type' => 'Organization', '@id' => \App\Support\StructuredData::organizationId(), 'name' => config('app.name'), 'url' => route('home'), 'email' => $site['email'] ?? null]),
+        'organizer' => $organizer,
+        'performer' => count($performers) === 1 ? $performers[0] : $performers,
         'inLanguage' => 'fr-FR',
         'keywords' => $event->keywords->pluck('name')->implode(', ') ?: null,
         // Séance complète (jauge atteinte) : « SoldOut ».
         'offers' => $event->is_free ? ['@type' => 'Offer', 'price' => 0, 'priceCurrency' => 'EUR', 'url' => $event->url(),
+            'validFrom' => $event->created_at?->toIso8601String(),
             'availability' => ($remaining[$d->id] ?? null) === 0 ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock'] : null,
     ]))->values();
 @endphp

@@ -131,6 +131,24 @@ class Event extends Model
         return $last ? ($last->ends_at ?? $last->starts_at) : null;
     }
 
+    /**
+     * Artistes et intervenants (JSON-LD « performer »), tirés des caractéristiques dont la clé
+     * les désigne (« Avec », « Intervenante », « Chœur », « Compagnie »…) ; une personne par ligne.
+     *
+     * @return list<array{@type: string, name: string}>
+     */
+    public function performers(): array
+    {
+        $performer = '/\b(avec|interven|conf[ée]renci|interpr[èe]t|artiste|musicien|chant|soliste|pianiste|organiste|com[ée]dien|guide|anim)/iu';
+        $group = '/\b(ch[œo]e?ur|chorale|orchestre|ensemble|compagnie|troupe|quatuor|trio|groupe)/iu';
+
+        return collect($this->specList())
+            ->filter(fn ($s) => preg_match($performer, $s['key']) || preg_match($group, $s['key']))
+            ->flatMap(fn ($s) => collect(preg_split('/\R/u', $s['value']))->map('trim')->filter()
+                ->map(fn ($name) => ['@type' => preg_match($group, $s['key']) ? 'PerformingGroup' : 'Person', 'name' => $name]))
+            ->values()->all();
+    }
+
     /** Liste « clé / valeur » limitée et nettoyée. */
     public function specList(): array
     {

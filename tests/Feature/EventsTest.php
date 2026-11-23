@@ -119,6 +119,9 @@ class EventsTest extends TestCase
             ->assertSee('<meta property="og:image" content="'.$event->shareImageUrl().'"', false)
             ->assertSee('"@type":"TheaterEvent"', false)
             ->assertSee('"startDate":"2026-12-12T20:30:00+01:00"', false)
+            ->assertSee('"endDate":"2026-12-12T22:30:00+01:00"', false)
+            ->assertSee('"performer":[{"@type":"Person","name":"Gérard Rouzier"},{"@type":"Person","name":"Johanna Berrebi"}]', false)
+            ->assertSee('"validFrom":"', false)
             ->assertSee('Gérard Rouzier<br', false)
             ->assertSee("S'inscrire à l'événement", false);
 
