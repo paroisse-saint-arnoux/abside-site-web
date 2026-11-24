@@ -7,9 +7,9 @@ use App\Mail\RegistrationCancelled;
 use App\Mail\RegistrationConfirmation;
 use App\Models\Event;
 use App\Models\Registration;
-use App\Services\Brevo;
 use App\Support\Booking;
 use App\Support\Calendar;
+use App\Support\Newsletter;
 use App\Support\SpamGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -18,21 +18,21 @@ use Illuminate\Validation\ValidationException;
 
 class RegistrationController extends Controller
 {
-    public function store(Request $request, string $slug, Brevo $brevo)
+    public function store(Request $request, string $slug)
     {
         $event = Event::where('slug', $slug)->with(['place', 'dates'])->firstOrFail();
         abort_unless($event->is_published || $request->user()?->is_active, 404);
         abort_unless($event->acceptsRegistrations(), 404);
 
         try {
-            return $this->register($request, $event, $brevo);
+            return $this->register($request, $event);
         } catch (ValidationException $e) {
             // Retour sur le formulaire (et non en haut de la page), avec les erreurs.
             throw $e->redirectTo($event->url().'#inscription');
         }
     }
 
-    private function register(Request $request, Event $event, Brevo $brevo)
+    private function register(Request $request, Event $event)
     {
         $upcoming = $event->dates->filter(fn ($d) => $d->starts_at->isFuture());
         $data = $request->validate([
@@ -62,7 +62,7 @@ class RegistrationController extends Controller
         rescue(fn () => Mail::to(config('services.contact.email'))->send(new RegistrationAlert($registration, ! $registration->wasRecentlyCreated)));
 
         if (! empty($data['newsletter'])) {
-            $brevo->subscribe($registration->contact->email, $data['first_name'], $data['last_name']);
+            Newsletter::sync($registration->contact);
         }
 
         return redirect()->to($event->url().'#inscription')->with('registration', $registration->token);

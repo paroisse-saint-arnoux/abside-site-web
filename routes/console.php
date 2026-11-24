@@ -5,6 +5,7 @@ use App\Models\Contact;
 use App\Models\Registration;
 use App\Models\User;
 use App\Support\MagicLink;
+use App\Support\Newsletter;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Schedule;
@@ -56,5 +57,20 @@ Artisan::command('contacts:purger', function () {
     $this->info("$count contact(s) supprimé(s).");
 })->purpose('Supprime les contacts sans participation depuis '.Contact::RETENTION_YEARS.' ans');
 
+// Newsletter : report dans Brevo des inscrits enregistrés dans la base mais pas encore transmis (Brevo absent ou en erreur).
+Artisan::command('newsletter:brevo', function () {
+    if (! Newsletter::brevoConfigured()) {
+        $this->warn('Brevo non configuré (BREVO_API_KEY, BREVO_LIST_ID) : '.Contact::awaitingBrevo()->count().' inscrit(s) en attente.');
+
+        return;
+    }
+    $synced = $failed = 0;
+    Contact::awaitingBrevo()->orderBy('id')->each(function (Contact $contact) use (&$synced, &$failed) {
+        Newsletter::sync($contact) ? $synced++ : $failed++;
+    });
+    $this->info("$synced inscrit(s) reporté(s) dans Brevo".($failed ? ", $failed en échec" : '').'.');
+})->purpose('Reporte dans Brevo les inscrits à la newsletter en attente');
+
 Schedule::command('inscriptions:rappels')->dailyAt('10:00');
 Schedule::command('contacts:purger')->dailyAt('03:30');
+Schedule::command('newsletter:brevo')->hourly()->when(fn () => Newsletter::brevoConfigured());

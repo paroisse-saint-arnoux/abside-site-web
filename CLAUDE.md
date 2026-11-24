@@ -66,7 +66,7 @@ npm run build                              # build de production dans public/bui
 ### Inscriptions (décisions du 05/11/2026)
 - **Réglable par événement** : inscription désactivée, facultative ou obligatoire, jauge facultative ; jauge atteinte → formulaire fermé, « Complet ». Pas de liste d'attente.
 - **Rappel automatique la veille** (e-mail Brevo : date, heure, adresse, lien Google Maps), par tâche planifiée (cron cPanel).
-- **RGPD** : inscriptions et contacts conservés **3 ans après la dernière participation**, puis supprimés automatiquement.
+- **RGPD** : inscriptions et contacts conservés **3 ans après la dernière participation**, puis supprimés automatiquement (sauf inscrits à la newsletter).
 - Mise en œuvre (étape 3) :
   - `Contact` (une fiche par e-mail, en minuscules ; `created_at` = date d'ajout ; `newsletter_at`) et `Registration` (contact × séance, nombre de places ≤ 10, `starts_at` recopié de la séance, jeton pour le .ics et l'annulation). Une seule inscription par contact et par séance : se réinscrire met à jour le nombre de places.
   - `App\Support\Booking::book()` : création ou mise à jour du contact et de l'inscription, **jauge par séance** sous verrou (formulaire du site et ajout manuel dans l'admin, qui peut forcer la jauge).
@@ -90,7 +90,7 @@ npm run build                              # build de production dans public/bui
 - **Matomo** auto-hébergé (`https://matomo.saint-arnoux.fr/`, site n° 4), repris de Saint Joseph : suivi sans cookie (`partials/matomo`, en production seulement), changements de filtre de l'agenda comptés comme pages vues ; tableau de bord de l'admin (`App\Services\Matomo`, widgets visites, graphique, pages les plus vues) avec `MATOMO_TOKEN`. Mentionné dans la politique de confidentialité.
 
 ### Formulaires
-- Newsletter : **Brevo** API (`App\Services\Brevo`, `BREVO_API_KEY`, `BREVO_LIST_ID`), sans double opt-in.
+- Newsletter (décision du 24/11/2026, Brevo pas encore ouvert) : chaque inscription est **enregistrée dans la base** (`Contact`, `newsletter_at`, via `App\Support\Newsletter`), depuis la bande newsletter ou la case du formulaire d'inscription, puis reportée dans **Brevo** API (`App\Services\Brevo`, `BREVO_API_KEY`, `BREVO_LIST_ID`, sans double opt-in) si c'est configuré ; `brevo_synced_at` marque le report. Les inscrits en attente sont repris par `newsletter:brevo` (toutes les heures, seulement si Brevo est configuré). Les inscrits à la newsletter ne sont pas purgés au bout de 3 ans (consentement valable jusqu'à la désinscription).
 - Contact : e-mail à `CONTACT_EMAIL`, reply-to = visiteur, non stocké.
 - Anti-spam (`App\Support\SpamGuard`, partial `partials/spam-guard`) : champ piège + horodatage chiffré + Turnstile facultatif.
 

@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\Brevo;
+use App\Support\Newsletter;
 use App\Support\SpamGuard;
 use Illuminate\Http\Request;
 
 class NewsletterController extends Controller
 {
-    public function store(Request $request, Brevo $brevo)
+    public function store(Request $request)
     {
         $data = $request->validate([
             'first_name' => ['required', 'string', 'max:80'],
@@ -17,8 +17,11 @@ class NewsletterController extends Controller
         ]);
 
         // Pas de Turnstile sur ce petit formulaire présent sur chaque page : honeypot + délai suffisent.
-        $ok = SpamGuard::passes($request, withTurnstile: false)
-            && $brevo->subscribe($data['email'], $data['first_name'], $data['last_name']);
+        // L'inscription est enregistrée dans la base, puis reportée dans Brevo quand c'est possible (voir Newsletter).
+        $ok = SpamGuard::passes($request, withTurnstile: false);
+        if ($ok) {
+            Newsletter::subscribe($data['email'], $data['first_name'], $data['last_name']);
+        }
 
         $message = $ok
             ? 'Merci ! Vous êtes inscrit(e) à notre lettre d\'information.'

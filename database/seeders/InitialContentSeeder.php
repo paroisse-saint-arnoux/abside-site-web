@@ -103,12 +103,12 @@ MD,
             ],
             'support' => [
                 'title' => "Soutenir l'association",
-                'intro' => "La plupart de nos événements sont en participation libre : votre soutien permet de les faire vivre.",
-                'body' => "*Texte à compléter : adhésion, dons, mécénat, bénévolat.*",
+                'intro' => 'La plupart de nos événements sont en participation libre : votre soutien permet de les faire vivre.',
+                'body' => '*Texte à compléter : adhésion, dons, mécénat, bénévolat.*',
             ],
             'press' => [
                 'title' => 'Presse',
-                'body' => "Pour toute demande de la presse (visuels, interviews, dossier de presse), écrivez-nous à [abside.association@gmail.com](mailto:abside.association@gmail.com) ou appelez le 06 14 47 30 42.",
+                'body' => 'Pour toute demande de la presse (visuels, interviews, dossier de presse), écrivez-nous à [abside.association@gmail.com](mailto:abside.association@gmail.com) ou appelez le 06 14 47 30 42.',
             ],
         ];
     }
@@ -154,7 +154,7 @@ Votre nom, votre adresse e-mail et votre message nous sont transmis par e-mail a
 
 ## Lettre d'information
 
-Si vous vous y inscrivez, votre prénom, votre nom et votre adresse e-mail sont enregistrés chez notre prestataire d'e-mailing **Brevo** (Sendinblue SAS, France) pour vous envoyer nos informations. Chaque lettre contient un lien de désinscription.
+Si vous vous y inscrivez, votre prénom, votre nom et votre adresse e-mail sont enregistrés sur le site et chez notre prestataire d'e-mailing **Brevo** (Sendinblue SAS, France) pour vous envoyer nos informations. Ils sont conservés jusqu'à votre désinscription : chaque lettre contient un lien pour vous désinscrire.
 
 ## Mesure d'audience
 

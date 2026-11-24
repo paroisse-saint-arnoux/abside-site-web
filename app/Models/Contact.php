@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Personne inscrite à au moins un événement (une fiche par adresse e-mail).
- * created_at = date d'ajout au carnet.
+ * Personne inscrite à un événement ou à la lettre d'information (une fiche par adresse e-mail).
+ * created_at = date d'ajout au carnet ; newsletter_at = inscription à la lettre ; brevo_synced_at = reportée dans Brevo.
  */
 #[Fillable(['email', 'first_name', 'last_name', 'phone', 'newsletter_at'])]
 class Contact extends Model
@@ -19,7 +19,7 @@ class Contact extends Model
 
     protected function casts(): array
     {
-        return ['newsletter_at' => 'datetime'];
+        return ['newsletter_at' => 'datetime', 'brevo_synced_at' => 'datetime'];
     }
 
     protected static function booted(): void
@@ -46,11 +46,20 @@ class Contact extends Model
         ]);
     }
 
-    /** Contacts à supprimer : dernière participation (ou ajout, faute d'inscription) il y a plus de 3 ans. */
+    /** Inscrits à la lettre d'information, pas encore reportés dans Brevo. */
+    public function scopeAwaitingBrevo(Builder $query): void
+    {
+        $query->whereNotNull('newsletter_at')->whereNull('brevo_synced_at');
+    }
+
+    /**
+     * Contacts à supprimer : dernière participation (ou ajout, faute d'inscription) il y a plus de 3 ans.
+     * Les inscrits à la lettre d'information sont gardés (leur consentement vaut jusqu'à leur désinscription).
+     */
     public function scopeExpired(Builder $query): void
     {
         $limit = now()->subYears(self::RETENTION_YEARS);
-        $query->where('created_at', '<', $limit)
+        $query->whereNull('newsletter_at')->where('created_at', '<', $limit)
             ->whereDoesntHave('registrations', fn ($q) => $q->where('starts_at', '>=', $limit));
     }
 }

@@ -49,8 +49,9 @@ class ContactResource extends Resource
                 TextInput::make('email')->label('E-mail')->email()->required()->maxLength(190)->unique(ignoreRecord: true),
                 TextInput::make('phone')->label('Téléphone')->tel()->maxLength(30),
                 Text::make(fn (?Contact $record) => $record
-                    ? 'Ajouté le '.$record->created_at->format('d/m/Y').($record->newsletter_at ? ' · inscrit à la newsletter le '.$record->newsletter_at->format('d/m/Y') : '')
-                        .'. Supprimé automatiquement '.Contact::RETENTION_YEARS.' ans après sa dernière participation.'
+                    ? 'Ajouté le '.$record->created_at->format('d/m/Y').($record->newsletter_at ? ' · inscrit à la newsletter le '.$record->newsletter_at->format('d/m/Y')
+                        .($record->brevo_synced_at ? ' (reporté dans Brevo)' : ' (pas encore reporté dans Brevo)') : '')
+                        .'. '.($record->newsletter_at ? 'Conservé tant qu\'il est inscrit à la newsletter.' : 'Supprimé automatiquement '.Contact::RETENTION_YEARS.' ans après sa dernière participation.')
                     : '')->columnSpanFull(),
             ]),
         ])->columns(1);
@@ -73,6 +74,7 @@ class ContactResource extends Resource
             ])
             ->filters([
                 TernaryFilter::make('newsletter_at')->label('Newsletter')->nullable(),
+                TernaryFilter::make('brevo_synced_at')->label('Reporté dans Brevo')->nullable(),
             ])
             ->headerActions([
                 Action::make('export')->label('Exporter (Excel)')->icon('heroicon-o-arrow-down-tray')->color('gray')
